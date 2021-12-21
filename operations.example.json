@@ -1,0 +1,9 @@
+{
+  "operations": [
+    { "type": "TRANSFER_REV", "amount": 1000, "recipient": "1111Wbd8KLeWBVsxByF9iksJ4QRRjEF3nq1ScgAw7bMbtomxHsqqd" },
+    { "type": "TRANSFER_REV", "amount": 99, "recipient": "1111Wbd8KLeWBVsxByF9iksJ4QRRjEF3nq1ScgAw7bMbtomxHsqqd" },
+    { "type": "TRANSFER_REV", "amount": 9956, "recipient": "1111Wbd8KLeWBVsxByF9iksJ4QRRjEF3nq1ScgAw7bMbtomxHsqqd" },
+    { "type": "TRANSFER_REV", "amount": 2000, "recipient": "bbb" },
+    { "type": "TRANSFER_REV", "amount": 30000, "recipient": "" }
+  ]
+}

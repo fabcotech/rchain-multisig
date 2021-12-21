@@ -1,0 +1,26 @@
+{
+  "name": "rchain-multisig",
+  "version": "0.1.0",
+  "description": "Multisig wallet on RChain",
+  "main": "src/index.js",
+  "scripts": {
+    "generate": "node generateJavascripts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabcotech/rchain-multisig.git"
+  },
+  "author": "FABCO",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fabcotech/rchain-multisig/issues"
+  },
+  "homepage": "https://github.com/fabcotech/rchain-multisig#readme",
+  "dependencies": {
+    "blakejs": "^1.1.0",
+    "dotenv": "6.2.0",
+    "rchain-toolkit": "0.4.4",
+    "uuid": "3.4.0"
+  },
+  "devDependencies": {}
+}

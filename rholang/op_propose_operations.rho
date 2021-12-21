@@ -1,0 +1,27 @@
+new basket,
+  returnCh,
+  stdout(`rho:io:stdout`),
+  deployerId(`rho:rchain:deployerId`),
+  registryLookup(`rho:registry:lookup`)
+in {
+
+  for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")) {
+    stdout!(*keyCh) |
+    keyCh!(("PROPOSE_OPERATIONS", OPERATIONSS, *returnCh)) |
+    for (@results <- returnCh) {
+      stdout!("results") |
+      stdout!(results) |
+      match results {
+        String => {
+          basket!({ "status": "failed", "error": results })
+        }
+        (true, Nil) => {
+          basket!({ "status": "completed" })
+        }
+        (true, String) => {
+          basket!({ "status": "completed", "message": results.nth(1) })
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+new stdout(`rho:io:stdout`) in {
+    stdout!([1]) |
+    stdout!([2].union([3]))
+}
