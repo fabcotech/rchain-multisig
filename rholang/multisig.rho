@@ -23,6 +23,12 @@ in {
   @(*vault, "lastExecutedOperations")!(Nil) |
   @(*vault, "publicKeys")!({}) |
 
+  for (@("PUBLIC_READ_OPERATIONS", publicKey, return) <= entryCh) {
+    for (@op <<- @(*vault, "operations", publicKey)) {
+      @return!(op)
+    }
+  } |
+
   for (@("PUBLIC_READ_LAST_EXECUTED_OPERATIONS", return) <= entryCh) {
     for (@leo <<- @(*vault, "lastExecutedOperations")) {
       @return!(leo)

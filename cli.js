@@ -3,7 +3,7 @@ const { getKey } = require('./cli/getKey');
 const { proposeOperations } = require('./cli/proposeOperations');
 const { read } = require('./cli/read');
 const { readLastExecutedOperations } = require('./cli/readLastExecutedOperations');
-
+const { readOperations } = require('./cli/readOperations');
 
 const { log } = require('./cli/utils');
 
@@ -65,6 +65,13 @@ const main = async () => {
   process.argv.findIndex((arg) => arg === 'last-operations') !== -1;
   if (readLastExecutedOperationsArg) {
     readLastExecutedOperations();
+    return;
+  }
+
+  const readOperationsArg =
+  process.argv.findIndex((arg) => arg === 'operations') !== -1;
+  if (readOperationsArg) {
+    readOperations();
     return;
   }
 

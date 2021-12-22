@@ -29,7 +29,7 @@ module.exports.proposeOperations = async () => {
   const data = rchainToolkit.utils.rhoValToJs(
     JSON.parse(dataAtNameResponse).exprs[0].expr
   );
-  console.log(data)
+
   if (data.status !== "completed") {
     console.log(data);
     process.exit();

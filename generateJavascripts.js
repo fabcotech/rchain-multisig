@@ -90,3 +90,17 @@ module.exports.readLastExecutedOperationsTerm = (
 };
 `
 );
+
+const readOperationsFile = fs
+  .readFileSync('./rholang/read_operations.rho')
+  .toString('utf8');
+fs.writeFileSync(
+  './src/readOperationsTerm.js',
+  `/* GENERATED CODE, only edit rholang/*.rho files*/
+module.exports.readOperationsTerm = (
+  payload
+) => {
+  return \`${replaceEverything(readOperationsFile)}\`;
+};
+`
+);

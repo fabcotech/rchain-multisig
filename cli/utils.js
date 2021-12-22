@@ -257,12 +257,12 @@ module.exports.getExpires = () => {
   return expires;
 };
 
-module.exports.getSignature = () => {
-  const signature = getProcessArgv('--signature');
-  if (!signature) {
-    throw new Error('Missing arguments --signature');
+module.exports.getPublicKey = () => {
+  const publicKey = getProcessArgv('--public-key');
+  if (!publicKey) {
+    throw new Error('Missing arguments --public-key');
   }
-  return signature;
+  return publicKey;
 };
 
 module.exports.getOperationsFile = () => {

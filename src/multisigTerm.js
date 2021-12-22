@@ -23,7 +23,13 @@ in {
 
   @(*vault, "percentage")!(66) |
   @(*vault, "lastExecutedOperations")!(Nil) |
-    @(*vault, "publicKeys")!({}) |
+  @(*vault, "publicKeys")!({}) |
+
+  for (@("PUBLIC_READ_OPERATIONS", publicKey, return) <= entryCh) {
+    for (@op <<- @(*vault, "operations", publicKey)) {
+      @return!(op)
+    }
+  } |
 
   for (@("PUBLIC_READ_LAST_EXECUTED_OPERATIONS", return) <= entryCh) {
     for (@leo <<- @(*vault, "lastExecutedOperations")) {
@@ -181,9 +187,6 @@ in {
                           for (@howMany <- howManyCh) {
                             match howMany.size() + 1 {
                               howMany2 => {
-                                stdout!("ok1") |
-                                stdout!(howMany2 * 100 / publicKeys.keys().size()) |
-                                stdout!(howMany2 * 100 / publicKeys.keys().size() >= percentage) |
                                 match howMany2 * 100 / publicKeys.keys().size() >= percentage {
                                   true => {
                                     executeOperationsCh!((operations, howMany.union(Set(last)), return))
@@ -198,9 +201,6 @@ in {
                         }
                         false => {
                           for (@howMany <- howManyCh) {
-                            stdout!("ok2") |
-                            stdout!(howMany.size() * 100 / publicKeys.keys().size()) |
-                            stdout!(howMany.size() * 100 / publicKeys.keys().size() >= percentage) |
                             match howMany.size() * 100 / publicKeys.keys().size() >= percentage {
                               true => {
                                 executeOperationsCh!((operations, howMany, return))
@@ -219,7 +219,6 @@ in {
                       match operations.toByteArray() == op.toByteArray() {
                         true => {
                           for (@howMany <- howManyCh) {
-                            stdout!(howMany) |
                             howManyCh!(howMany.union(Set(first))) |
                             itCh!(rest)
                           }
@@ -238,8 +237,6 @@ in {
       } |
   
       for (@(operations, publicKeys, return) <= executeOperationsCh) {
-        stdout!("executeOperationsCh") |
-        stdout!((operations, publicKeys, return)) |
         new overCh, overItCh, itCh, indexCh, resultsCh, ch1, ch2, ch3 in {
           for (@v <- overCh) {
             @return!(v) |

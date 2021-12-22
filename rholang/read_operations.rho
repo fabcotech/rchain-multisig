@@ -1,0 +1,14 @@
+new basket,
+  masterEntryCh, 
+  resultCh,
+  stdout(`rho:io:stdout`),
+  deployerId(`rho:rchain:deployerId`),
+  registryLookup(`rho:registry:lookup`)
+in {
+
+  registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
+
+  for (masterEntry <= masterEntryCh) {
+    masterEntry!(("PUBLIC_READ_OPERATIONS", "PUBLIC_KEY", *basket)) 
+  }
+}
