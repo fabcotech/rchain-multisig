@@ -11,9 +11,9 @@ RChain multisig is very simple, members can propose operations, when at least 66
 ro = Read only, it does not change the state of the contract in any way
 
 ```
-ro PUBLIC_READ_OPERATIONS: (memberId: String, index: Int) => Nil | List[operation]
+ro PUBLIC_READ: () => All general informations about the contract
+ro PUBLIC_READ_OPERATIONS: (memberId: String) => Nil | List[operation]
 ro PUBLIC_READ_LAST_EXECUTED_OPERATIONS: () => Map([id]: String)
-ro PUBLIC_READ: () => Config object
 PUBLIC_APPLY: ({ applicationId: String, applicationChannel: channel }) => String | (true, String)
 ```
 
