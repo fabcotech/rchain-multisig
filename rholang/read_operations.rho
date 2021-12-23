@@ -9,6 +9,6 @@ in {
   registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ_OPERATIONS", "PUBLIC_KEY", *basket)) 
+    masterEntry!(("PUBLIC_READ_OPERATIONS", "MEMBER_ID", *basket)) 
   }
 }

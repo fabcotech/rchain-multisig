@@ -1,5 +1,6 @@
 new basket,
-  masterEntryCh, 
+  masterEntryCh,
+  applicationCh,
   resultCh,
   stdout(`rho:io:stdout`),
   deployerId(`rho:rchain:deployerId`),
@@ -9,18 +10,24 @@ in {
   registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_GET_KEY", "PUBLIC_KEY", "SIGNATURE", *resultCh)) |
+    masterEntry!(("PUBLIC_APPLY", "APPLICATION_ID", bundle+{*applicationCh}, bundle+{*resultCh})) |
+
+    // application accepted
+    for (@key <- applicationCh) {
+      stdout!("application was accepted") |
+      @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")!(key)
+    } |
+
+    // application recorded
     for (@r <- resultCh) {
-      stdout!(r) |
       match r {
         String => {
           basket!({ "status": "failed", "message": r }) |
           stdout!(("failed", r))
         }
         (true, p) => {
-          @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")!(p) |
-          basket!({ "status": "completed" }) |
-          stdout!("completed, key recovered")
+          basket!({ "status": "completed", "message": p }) |
+          stdout!(p)
         }
       }
     }

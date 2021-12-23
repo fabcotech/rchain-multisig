@@ -8,6 +8,8 @@ const replaceEverything = (a) => {
       .replace(/\$\{/g, '\\${')
       .replace(/\\\//g, '\\\\/')
       .replace(/PUBLIC_KEY/g, '${payload.publicKey}')
+      .replace(/APPLICATION_ID/g, '${payload.applicationId}')
+      .replace(/MEMBER_ID/g, '${payload.memberId}')
       .replace(/SIGNATURE/g, '${payload.signature}')
       .replace(/MULTISIG_REGISTRY_URI/g, '${payload.multisigRegistryUri}')
       .replace(
@@ -35,16 +37,16 @@ module.exports.multisigTerm = (payload) => {
 `
 );
 
-const getKeyFile = fs
-  .readFileSync('./rholang/op_get_key.rho')
+const applyFile = fs
+  .readFileSync('./rholang/op_apply.rho')
   .toString('utf8');
 fs.writeFileSync(
-  './src/getKeyTerm.js',
+  './src/applyTerm.js',
   `/* GENERATED CODE, only edit rholang/*.rho files*/
-module.exports.getKeyTerm = (
+module.exports.applyTerm = (
   payload
 ) => {
-  return \`${replaceEverything(getKeyFile)}\`;
+  return \`${replaceEverything(applyFile)}\`;
 };
 `
 );

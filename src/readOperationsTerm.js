@@ -13,7 +13,7 @@ in {
   registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ_OPERATIONS", "${payload.publicKey}", *basket)) 
+    masterEntry!(("PUBLIC_READ_OPERATIONS", "${payload.memberId}", *basket)) 
   }
 }
 `;

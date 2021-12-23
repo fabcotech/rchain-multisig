@@ -16,20 +16,19 @@ module.exports.read = async () => {
   );
   const config = rchainToolkit.utils.rhoValToJs(JSON.parse(result1).expr[0]);
 
-  const initiated = Object.keys(config.publicKeys).filter(pk => config.publicKeys[pk] === "initiated");
-  const registered = Object.keys(config.publicKeys).filter(pk => config.publicKeys[pk] === "registered");
-
+console.log(config)
   console.log(``);
-  console.log(`Multisig contract    : ${registered.length} registered public key(s) / ${Object.keys(config.publicKeys).length} in total`);
+  console.log(`==== Multisig contract ====\n`);
+  console.log(`Pending applications : ${config.applications.length} :  ${config.applications.join(', ')}`);
   console.log(`Multisig resitry URI : ${multisigRegistryUri} (not a REV address)`);
   console.log(`REV address          : ${config.revAddress}`);
   console.log(`REV balance          : ${config.revBalance} dust | ${Math.round(100 * parseInt(config.revBalance, 10) / 100000000) / 100} REV`);
   console.log(`Synchrony constraint : ${config.percentage}%`);
 
   console.log(``);
-  console.log(`Public keys          :`);
-  Object.keys(config.publicKeys).forEach(pk => {
-    console.log(`  ${pk} : ${config.publicKeys[pk]}`)
+  console.log(`Members              :`);
+  Object.keys(config.members).forEach(pk => {
+    console.log(`  ${pk} : ${config.members[pk]}`)
   })
   console.log('\n')
 };

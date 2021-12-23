@@ -8,8 +8,8 @@ const {
 } = require('./utils');
 
 module.exports.deployMultisig = async () => {
-  if (typeof process.env.MASTER_REGISTRY_URI === 'string') {
-    console.log('Please remove MASTER_REGISTRY_URI=* line in .env file');
+  if (typeof process.env.MULTISIG_REGISTRY_URI === 'string') {
+    console.log('Please remove MULTISIG_REGISTRY_URI=* line in .env file');
     process.exit();
   }
 

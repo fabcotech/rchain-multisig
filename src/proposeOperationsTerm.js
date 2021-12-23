@@ -11,7 +11,7 @@ in {
 
   for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")) {
     stdout!(*keyCh) |
-    keyCh!(("PROPOSE_OPERATIONS", ${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil')}, *returnCh)) |
+    keyCh!(("PROPOSE_OPERATIONS", ${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil')}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!("results") |
       stdout!(results) |

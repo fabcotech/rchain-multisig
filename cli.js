@@ -1,5 +1,5 @@
 const { deployMultisig } = require('./cli/deployMultisig');
-const { getKey } = require('./cli/getKey');
+const { apply } = require('./cli/apply');
 const { proposeOperations } = require('./cli/proposeOperations');
 const { read } = require('./cli/read');
 const { readLastExecutedOperations } = require('./cli/readLastExecutedOperations');
@@ -40,10 +40,10 @@ const main = async () => {
     return;
   }
 
-  const getKeyArg =
-    process.argv.findIndex((arg) => arg === 'get-key') !== -1;
-  if (getKeyArg) {
-    getKey();
+  const applyArg =
+    process.argv.findIndex((arg) => arg === 'apply') !== -1;
+  if (applyArg) {
+    apply();
     return;
   }
 

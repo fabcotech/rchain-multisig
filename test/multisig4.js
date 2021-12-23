@@ -4,32 +4,36 @@ const checkLastOperations = require('./checkLastOperations').main
 const transferRev = require('./transferRev').main
 const getRevAddress = require('./getRevAddress').main
 const checkMultisigBalance = require('./checkMultisigBalance').main
-const checkPublicKeys = require('./checkPublicKeys').main
+const checkMembers = require('./checkMembers').main
 const getBalance = require('./getBalance').main
 const deployMultisig = require('./test_deployMultisig').main
-const getKey = require('./test_getKey').main
+const apply = require('./test_apply').main
 const proposeOperations = require('./test_proposeOperations').main
 
 const PRIVATE_KEY1 = "28a5c9ac133b4449ca38e9bdf7cacdce31079ef6b3ac2f0a080af83ecff98b36"
 const PUBLIC_KEY1 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY1);
 const ADDRESS1 = rc.utils.revAddressFromPublicKey(PUBLIC_KEY1);
+const APPLICATION_ID1 = PUBLIC_KEY1.slice(0, 5);
 
 const PRIVATE_KEY2 = "5fa23a9d526129a294baa53cd26844f2a83cd52e44e723cef8c8f61f45a9b220"
 const PUBLIC_KEY2 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY2);
 const ADDRESS2 = rc.utils.revAddressFromPublicKey(PUBLIC_KEY2);
+const APPLICATION_ID2 = PUBLIC_KEY2.slice(0, 5);
 
 const PRIVATE_KEY3 = "62dce7c35de80ba4bbdebc2653d3ca4d7b46454a7b7a992ef36593f5a0c81b31"
 const PUBLIC_KEY3 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY3);
 const ADDRESS3 = rc.utils.revAddressFromPublicKey(PUBLIC_KEY3);
+const APPLICATION_ID3 = PUBLIC_KEY3.slice(0, 5);
 
 const PRIVATE_KEY4 = "f17f45faaceb506f27eb7fded347319220081cbbb053a7c34ebc6d21707442c6"
 const PUBLIC_KEY4 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY4);
 const ADDRESS4 = rc.utils.revAddressFromPublicKey(PUBLIC_KEY4);
+const APPLICATION_ID4 = PUBLIC_KEY4.slice(0, 5);
 
 const main = async () => {
-  await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000);
+  /* await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000);
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS3, 1000000000);
-  await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000);
+  await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000); */
   console.log('✓ Initialized tests with 3 REV transfers')
 
   const result = await deployMultisig(PRIVATE_KEY1, [
@@ -38,26 +42,30 @@ const main = async () => {
 
   const multisigRegistryUri = result.registryUri.replace('rho:id:', '');
 
-  await checkPublicKeys(multisigRegistryUri, { [PUBLIC_KEY1]: "initialized" })
-  await checkPublicKeys(multisigRegistryUri, { [PUBLIC_KEY2]: "initialized" })
-  await checkPublicKeys(multisigRegistryUri, { [PUBLIC_KEY3]: "initialized" })
-  await checkPublicKeys(multisigRegistryUri, { [PUBLIC_KEY4]: "initialized" })
+  await apply(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1)
+  await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
+  console.log('✓ First application validated, received its OCAP key')
+  await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
+  await apply(multisigRegistryUri, PRIVATE_KEY3, APPLICATION_ID3)
+  await apply(multisigRegistryUri, PRIVATE_KEY4, APPLICATION_ID4)
 
-  console.log('✓ Checked all initialized public keys')
+  const OPERATIONS_ACCEPT = [
+    { "type": "ACCEPT", "applicationId": "doesnotexist" },
+    { "type": "ACCEPT", "applicationId": APPLICATION_ID2 },
+    { "type": "ACCEPT", "applicationId": APPLICATION_ID3 },
+    { "type": "ACCEPT", "applicationId": APPLICATION_ID4 }
+  ];
+  const proposalAccept = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS_ACCEPT);
 
-  await getKey(multisigRegistryUri, PRIVATE_KEY1, PUBLIC_KEY1)
-  await checkPublicKeys(multisigRegistryUri, { [PUBLIC_KEY1]: "registered" })
-  console.log('✓ First public key got its OCAP key')
-
-  await getKey(multisigRegistryUri, PRIVATE_KEY2, PUBLIC_KEY2)
-  await getKey(multisigRegistryUri, PRIVATE_KEY3, PUBLIC_KEY3)
-  await getKey(multisigRegistryUri, PRIVATE_KEY4, PUBLIC_KEY4)
-  await checkPublicKeys(multisigRegistryUri, {
-    [PUBLIC_KEY1]: "registered",
-    [PUBLIC_KEY2]: "registered",
-    [PUBLIC_KEY3]: "registered",
+  await checkLastOperations(multisigRegistryUri, {
+    "0": "application id not found",
+    "1": "application accepted",
+    "2": "application accepted",
+    "3": "application accepted",
   })
-  console.log('✓ All 4 public keys got their OCAP keys')
+  await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2, APPLICATION_ID3]);
+
+  console.log('✓ All 4 identities got their OCAP keys')
   
   const multisigRevAddress = await getRevAddress(multisigRegistryUri);
 
@@ -108,6 +116,7 @@ const main = async () => {
 
   // 75%
   const proposal4 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1);
+  console.log(proposal4)
   if (proposal4.message !== "operations recorded, did execute") {
     throw new Error('proposal 4, expected "operations recorded, did execute"')
   }
@@ -124,6 +133,7 @@ const main = async () => {
 
   // 25%
   const proposalAgain = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1);
+  console.log(proposalAgain)
   if (proposalAgain.message !== "operations recorded, did not execute") {
     throw new Error('proposal (agains), expected "operations recorded, did not execute"')
   }

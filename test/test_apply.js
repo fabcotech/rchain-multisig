@@ -1,23 +1,15 @@
-const { getKeyTerm } = require('../src');
+const { applyTerm } = require('../src');
 const rc = require('rchain-toolkit');
-const { blake2b } = require("blakejs");
 
 module.exports.main = async (
   multisigRegistryUri,
   privateKey,
-  publicKey,
+  applicationId,
 ) => {
 
-  const bufferToSign = Buffer.from(`rho:id:${multisigRegistryUri}`, "utf8");
-  const uInt8Array = new Uint8Array(bufferToSign);
-  const blake2bHash = blake2b(uInt8Array, 0, 32);
-  const signature = rc.utils.signSecp256k1(blake2bHash, privateKey);
-  const signatureHex = Buffer.from(signature).toString("hex");
-
-  const term = getKeyTerm({
+  const term = applyTerm({
     multisigRegistryUri: multisigRegistryUri,
-    publicKey: publicKey,
-    signature: signatureHex,
+    applicationId: applicationId,
   });
 
   let dataAtNameResponse;
@@ -38,6 +30,7 @@ module.exports.main = async (
   const data = rc.utils.rhoValToJs(
     JSON.parse(dataAtNameResponse).exprs[0].expr
   );
+  console.log(data);
 
   if (data.status !== 'completed') {
     console.log(data);

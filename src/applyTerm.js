@@ -1,9 +1,10 @@
 /* GENERATED CODE, only edit rholang/*.rho files*/
-module.exports.getKeyTerm = (
+module.exports.applyTerm = (
   payload
 ) => {
   return `new basket,
-  masterEntryCh, 
+  masterEntryCh,
+  applicationCh,
   resultCh,
   stdout(\`rho:io:stdout\`),
   deployerId(\`rho:rchain:deployerId\`),
@@ -13,18 +14,24 @@ in {
   registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_GET_KEY", "${payload.publicKey}", "${payload.signature}", *resultCh)) |
+    masterEntry!(("PUBLIC_APPLY", "${payload.applicationId}", bundle+{*applicationCh}, bundle+{*resultCh})) |
+
+    // application accepted
+    for (@key <- applicationCh) {
+      stdout!("application was accepted") |
+      @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")!(key)
+    } |
+
+    // application recorded
     for (@r <- resultCh) {
-      stdout!(r) |
       match r {
         String => {
           basket!({ "status": "failed", "message": r }) |
           stdout!(("failed", r))
         }
         (true, p) => {
-          @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")!(p) |
-          basket!({ "status": "completed" }) |
-          stdout!("completed, key recovered")
+          basket!({ "status": "completed", "message": p }) |
+          stdout!(p)
         }
       }
     }

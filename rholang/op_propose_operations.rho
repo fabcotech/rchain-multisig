@@ -7,7 +7,7 @@ in {
 
   for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")) {
     stdout!(*keyCh) |
-    keyCh!(("PROPOSE_OPERATIONS", OPERATIONSS, *returnCh)) |
+    keyCh!(("PROPOSE_OPERATIONS", OPERATIONSS, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!("results") |
       stdout!(results) |
