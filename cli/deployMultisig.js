@@ -4,7 +4,6 @@ const fs = require('fs');
 const { multisigTerm } = require('../src/multisigTerm');
 const {
   log,
-  getPublicKeys,
 } = require('./utils');
 
 module.exports.deployMultisig = async () => {
@@ -13,7 +12,7 @@ module.exports.deployMultisig = async () => {
     process.exit();
   }
 
-  const term = multisigTerm({ publicKeys: getPublicKeys() });
+  const term = multisigTerm({});
 
   let dataAtNameResponse;
   try {

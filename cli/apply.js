@@ -4,7 +4,7 @@ const { applyTerm } = require('../src/');
 
 const { log, getMultisigRegistryUri, getApplicationId } = require('./utils');
 
-module.exports.getKey = async () => {
+module.exports.apply = async () => {
   const multisigRegistryUri = getMultisigRegistryUri();
   const applicationId = getApplicationId();
 

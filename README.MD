@@ -6,6 +6,20 @@ Multisig contract, used for executing actions based on the agreement between 66%
 
 RChain multisig is very simple, members can propose operations, when at least 66% of the members propose the exact same operations in the same order, they are executed.
 
+#### CLI
+
+```
+# Deploy an empty multisig
+node cli deploy-multisig
+
+# Join the multisig
+# 1st application is automatically accepted
+node cli apply --application-id bob
+
+# Read the informations of the multisig
+node cli read
+```
+
 #### Public methods
 
 ro = Read only, it does not change the state of the contract in any way
