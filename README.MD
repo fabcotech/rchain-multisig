@@ -25,7 +25,7 @@ Private methods are only available for members.
 ro PROPOSE_OPERATIONS: (operations: Nil | List[operation]) => String | (true, Nil)
 ```
 
-Right now only two kind of operations can be proposed. `PROPOSE_OPERATIONS` will be rejected if oe operation does not match one of the authorized operations.
+Right now only two kind of operations can be proposed. `PROPOSE_OPERATIONS` will be rejected if one operation does not match one of the authorized operations.
 ```
 # 1 REV transfer
 { "type": "TRANSFER_REV", "amount": Int, "recipient": String }
