@@ -4,7 +4,8 @@
   "description": "Multisig wallet on RChain",
   "main": "src/index.js",
   "scripts": {
-    "generate": "node generateJavascripts"
+    "generate": "node generateJavascripts",
+    "test": "node test/multisig4.js"
   },
   "repository": {
     "type": "git",

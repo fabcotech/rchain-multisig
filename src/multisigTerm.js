@@ -7,6 +7,7 @@ module.exports.multisigTerm = (payload) => {
   entryUriCh,
 
   getOperationIdCh,
+  validateStringCh,
 
   applicationsCh,
   acceptCh,
@@ -29,6 +30,32 @@ in {
   @(*vault, "percentage")!(66) |
   @(*vault, "lastExecutedOperations")!({}) |
   @(*vault, "members")!(Set()) |
+
+  for (@(str, ret) <= validateStringCh) {
+    stdout!("validateStringCh") |
+    match (str, Set("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")) {
+      (String, valids) => {
+        stdout!("yes1") |
+        match (str.length() > 1, str.length() < 25) {
+          (true, true) => {
+            stdout!("yes2") |
+            new tmpCh, itCh in {
+              for (@i <= itCh) {
+                if (i == str.length()) { @ret!(true) }
+                else {
+                  if (valids.contains(str.slice(i, i + 1)) == true) { itCh!(i + 1) }
+                  else { @ret!(false) }
+                }
+              } |
+              itCh!(0)
+            }
+          }
+          _ => { @ret!(false) }
+        }
+      }
+      _ => { @ret!(false) }
+    }
+  } |
 
   for (@("PUBLIC_READ_OPERATIONS", memberId, return) <= entryCh) {
     for (@op <<- @(*vault, "operations", memberId)) {
@@ -76,29 +103,39 @@ in {
   } |
 
   for (@("PUBLIC_APPLY", applicationId, applicationCh, return) <= entryCh) {
-    for (@members <<- @(*vault, "members")) {
-      match (applicationId, members.size()) {
-        (String, 0) => {
-          stdout!("First application, will be automatically accepted") |
-          acceptCh!((applicationId, applicationCh, return))
-        }
-        (String, Int) => {
-          for (@applications <- applicationsCh) {
-            match applications.get(applicationId) {
-              Nil => {
-                stdout!("Not first application, will be registered") |
-                applicationsCh!(applications.set(applicationId, applicationCh)) |
-                @return!((true, "application registered"))
+    new ch1 in {
+      stdout!("will call validateStringCh") |
+      validateStringCh!((applicationId, *ch1)) |
+      for (@valid <- ch1) {
+        if (valid == true) {
+          for (@members <<- @(*vault, "members")) {
+            match members.size() {
+              0 => {
+                stdout!("First application, will be automatically accepted") |
+                acceptCh!((applicationId, applicationCh, return))
+              }
+              Int => {
+                for (@applications <- applicationsCh) {
+                  match applications.get(applicationId) {
+                    Nil => {
+                      stdout!("Not first application, will be registered") |
+                      applicationsCh!(applications.set(applicationId, applicationCh)) |
+                      @return!((true, "application registered"))
+                    }
+                    _ => {
+                      applicationsCh!(applications) |
+                      @return!("error: application already exists")
+                    }
+                  }
+                }
               }
               _ => {
-                applicationsCh!(applications) |
-                @return!("error: application already exists")
+                @return!("error: applicationId must be string")
               }
             }
           }
-        }
-        _ => {
-          @return!("error: applicationId must be string")
+        } else {
+          @return!("error: applicationId must be string with characters a-z0-9 and length 1-25")
         }
       }
     }
@@ -397,8 +434,8 @@ in {
 
   new unf, ch1, ch2, ch4 in {
     for (entryUri <<- entryUriCh) {
-
       registryLookup!(\`rho:rchain:revVault\`, *ch4) |
+
       for (@(_, RevVault) <- ch4) {
         @RevVault!("unforgeableAuthKey", *unf, *ch1) |
         revAddress!("fromUnforgeable", *unf, *ch2)
