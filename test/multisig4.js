@@ -31,6 +31,12 @@ const ADDRESS4 = rc.utils.revAddressFromPublicKey(PUBLIC_KEY4);
 const APPLICATION_ID4 = PUBLIC_KEY4.slice(0, 5);
 
 const main = async () => {
+  console.log('Starting tests, make sure those following REV addresses have REV :')
+  console.log('(you may uncomment lines 40-42 to transfer REV)')
+  console.log(ADDRESS1);
+  console.log(ADDRESS2);
+  console.log(ADDRESS3);
+  console.log(ADDRESS4);
   /* await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000);
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS3, 1000000000);
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000); */

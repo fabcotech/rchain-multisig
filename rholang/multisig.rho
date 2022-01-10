@@ -15,7 +15,7 @@ new
   executeOp1Ch,
   executeOp2Ch,
 
-  vault,
+  self,
 
   insertArbitrary(`rho:registry:insertArbitrary`),
   stdout(`rho:io:stdout`),
@@ -25,18 +25,15 @@ new
 in {
 
   applicationsCh!({}) |
-  @(*vault, "percentage")!(66) |
-  @(*vault, "lastExecutedOperations")!({}) |
-  @(*vault, "members")!(Set()) |
+  @(*self, "percentage")!(66) |
+  @(*self, "lastExecutedOperations")!({}) |
+  @(*self, "members")!(Set()) |
 
   for (@(str, ret) <= validateStringCh) {
-    stdout!("validateStringCh") |
     match (str, Set("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")) {
       (String, valids) => {
-        stdout!("yes1") |
         match (str.length() > 1, str.length() < 25) {
           (true, true) => {
-            stdout!("yes2") |
             new tmpCh, itCh in {
               for (@i <= itCh) {
                 if (i == str.length()) { @ret!(true) }
@@ -56,13 +53,13 @@ in {
   } |
 
   for (@("PUBLIC_READ_OPERATIONS", memberId, return) <= entryCh) {
-    for (@op <<- @(*vault, "operations", memberId)) {
+    for (@op <<- @(*self, "operations", memberId)) {
       @return!(op)
     }
   } |
 
   for (@("PUBLIC_READ_LAST_EXECUTED_OPERATIONS", return) <= entryCh) {
-    for (@leo <<- @(*vault, "lastExecutedOperations")) {
+    for (@leo <<- @(*self, "lastExecutedOperations")) {
       @return!(leo)
     }
   } |
@@ -70,10 +67,10 @@ in {
   for (@("PUBLIC_READ", return) <= entryCh) {
     new ch1, ch2, ch3 in {
       for (@entryUri <<- entryUriCh) {
-        for (@members <<- @(*vault, "members")) {
+        for (@members <<- @(*self, "members")) {
           for (@applications <<- applicationsCh) {
-            for (@revAddress <<- @(*vault, "revAddress")) {
-              for (@percentage <<- @(*vault, "percentage")) {
+            for (@revAddress <<- @(*self, "revAddress")) {
+              for (@percentage <<- @(*self, "percentage")) {
                 registryLookup!(`rho:rchain:revVault`, *ch1) |
                 for (@(_, RevVault) <- ch1) {
                   @RevVault!("findOrCreate", revAddress, *ch2) |
@@ -102,11 +99,10 @@ in {
 
   for (@("PUBLIC_APPLY", applicationId, applicationCh, return) <= entryCh) {
     new ch1 in {
-      stdout!("will call validateStringCh") |
       validateStringCh!((applicationId, *ch1)) |
       for (@valid <- ch1) {
         if (valid == true) {
-          for (@members <<- @(*vault, "members")) {
+          for (@members <<- @(*self, "members")) {
             match members.size() {
               0 => {
                 stdout!("First application, will be automatically accepted") |
@@ -140,8 +136,8 @@ in {
   } |
 
   for (@(memberId, applicationCh, return) <= acceptCh) {
-    for (@members <- @(*vault, "members")) {
-      @(*vault, "members")!(members.union(Set(memberId))) |
+    for (@members <- @(*self, "members")) {
+      @(*self, "members")!(members.union(Set(memberId))) |
       new keyCh in {
         for (@("PROPOSE_OPERATIONS", operations, return2) <= keyCh) {
           match operations {
@@ -149,8 +145,8 @@ in {
               checkOperationsCh!((operations, memberId, return2))
             }
             Nil => {
-              for (_ <- @(*vault, "operations", memberId)) {
-                @(*vault, "operations", memberId)!(Nil) |
+              for (_ <- @(*self, "operations", memberId)) {
+                @(*self, "operations", memberId)!(Nil) |
                 @return2!((true, Nil))
               }
             }
@@ -160,7 +156,7 @@ in {
           }
         } |
 
-        @(*vault, "operations", memberId)!(Nil) |
+        @(*self, "operations", memberId)!(Nil) |
         @applicationCh!(bundle+{*keyCh}) |
         @return!((true, "application accepted"))
       }
@@ -196,8 +192,8 @@ in {
               if (operationId == Nil) {
                 @return!("error: operation is invalid")
               } else {
-                for (_ <- @(*vault, "operations", memberId)) {
-                  @(*vault, "operations", memberId)!(operations) |
+                for (_ <- @(*self, "operations", memberId)) {
+                  @(*self, "operations", memberId)!(operations) |
                   checkAgreementCh!((operations, return))
                 }
               }
@@ -221,13 +217,13 @@ in {
   for (@(operations, return) <= checkAgreementCh) {
     new itCh, howManyCh in {
       howManyCh!(Set()) |
-      for (@members <<- @(*vault, "members")) {
-        for (@percentage <<- @(*vault, "percentage")) {
+      for (@members <<- @(*self, "members")) {
+        for (@percentage <<- @(*self, "percentage")) {
           itCh!(members) |
           for (@tmpMembers <= itCh) {
             match tmpMembers {
               Set(last) => {
-                for (@op <<- @(*vault, "operations", last)) {
+                for (@op <<- @(*self, "operations", last)) {
                   match operations.toByteArray() == op.toByteArray() {
                     true => {
                       for (@howMany <- howManyCh) {
@@ -261,7 +257,7 @@ in {
                 }
               }
               Set(first...rest) => {
-                for (@op <<- @(*vault, "operations", first)) {
+                for (@op <<- @(*self, "operations", first)) {
                   match operations.toByteArray() == op.toByteArray() {
                     true => {
                       for (@howMany <- howManyCh) {
@@ -287,8 +283,8 @@ in {
   // =================
   for (@(op, index, RevVault, return) <= executeOp1Ch) {
     new ch1, ch2, ch3 in {
-      for (@revAddress <<- @(*vault, "revAddress")) {
-        for (@revAuthKey <<- @(*vault, "revAuthKey")) {
+      for (@revAddress <<- @(*self, "revAddress")) {
+        for (@revAuthKey <<- @(*self, "revAuthKey")) {
           @RevVault!("findOrCreate", revAddress, *ch1) |
           for (@a <- ch1) {
             match a {
@@ -297,14 +293,14 @@ in {
                 for (@transferResult <- ch2) {
                   match transferResult {
                     (true, Nil) => {
-                      for (@leo <- @(*vault, "lastExecutedOperations")) {
-                        @(*vault, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "success"))
+                      for (@leo <- @(*self, "lastExecutedOperations")) {
+                        @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "success"))
                       } |
                       @return!(Nil)
                     }
                     (false, message) => {
-                      for (@leo <- @(*vault, "lastExecutedOperations")) {
-                        @(*vault, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, message))
+                      for (@leo <- @(*self, "lastExecutedOperations")) {
+                        @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, message))
                       } |
                       @return!(Nil)
                     }
@@ -312,8 +308,8 @@ in {
                 }
               }
               _ => {
-                for (@leo <- @(*vault, "lastExecutedOperations")) {
-                  @(*vault, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "error CRITICAL: invalid rev address"))
+                for (@leo <- @(*self, "lastExecutedOperations")) {
+                  @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "error CRITICAL: invalid rev address"))
                 } |
                 @return!(Nil)
               }
@@ -332,15 +328,15 @@ in {
       match applications.get(op.get("applicationId")) {
         Nil => {
           applicationsCh!(applications) |
-          for (@leo <- @(*vault, "lastExecutedOperations")) {
-            @(*vault, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application id not found"))
+          for (@leo <- @(*self, "lastExecutedOperations")) {
+            @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application id not found"))
           } |
           @return!(Nil)
         }
         applicationCh => {
           applicationsCh!(applications.delete(op.get("applicationId"))) |
-          for (@leo <- @(*vault, "lastExecutedOperations")) {
-            @(*vault, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application accepted"))
+          for (@leo <- @(*self, "lastExecutedOperations")) {
+            @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application accepted"))
           } |
           acceptCh!((op.get("applicationId"), applicationCh, return))
         }
@@ -356,13 +352,13 @@ in {
         for (@tmpIds <= overItCh) {
           match tmpIds {
             Set(last) => {
-              for (_ <- @(*vault, "operations", last)) {
-                @(*vault, "operations", last)!(Nil)
+              for (_ <- @(*self, "operations", last)) {
+                @(*self, "operations", last)!(Nil)
               }
             }
             Set(first...rest) => {
-              for (_ <- @(*vault, "operations", first)) {
-                @(*vault, "operations", first)!(Nil)
+              for (_ <- @(*self, "operations", first)) {
+                @(*self, "operations", first)!(Nil)
               } |
               overItCh!(rest)
             }
@@ -373,8 +369,8 @@ in {
       registryLookup!(`rho:rchain:revVault`, *ch1) |
       itCh!(operations) |
       indexCh!(0) |
-      for (_ <- @(*vault, "lastExecutedOperations")) {
-        @(*vault, "lastExecutedOperations")!({}) |
+      for (_ <- @(*self, "lastExecutedOperations")) {
+        @(*self, "lastExecutedOperations")!({}) |
         for (@(_, RevVault) <- ch1) {
           for (@tmpOperations <= itCh) {
             match tmpOperations {
@@ -440,8 +436,8 @@ in {
       } |
 
       for (@revAuthKey <- ch1; @revAddress <- ch2) {
-        @(*vault, "revAuthKey")!(revAuthKey) |
-        @(*vault, "revAddress")!(revAddress) |
+        @(*self, "revAuthKey")!(revAuthKey) |
+        @(*self, "revAddress")!(revAddress) |
         basket!({
           "status": "completed",
           "registryUri": *entryUri
