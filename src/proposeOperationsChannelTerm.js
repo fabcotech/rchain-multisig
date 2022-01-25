@@ -9,7 +9,7 @@ module.exports.proposeOperationsChannelTerm = (
   deployerId(\`rho:rchain:deployerId\`),
   registryLookup(\`rho:registry:lookup\`)
 in {
-  for (@(operationId, op, RevVault, revAuthKey, revAddress, return) <= newExecuteCh) {
+  for (@(operationId, op, RevVault, revAuthKey, revAddress, members, return) <= newExecuteCh) {
     stdout!("new execute channel") |
     stdout!(("revAuthKey", revAuthKey)) |
     stdout!(("revAddress", revAddress)) |
@@ -18,7 +18,7 @@ in {
   } |
 
   for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")) {
-    keyCh!(("PROPOSE_OPERATIONS", *newExecuteCh, bundle+{*returnCh})) |
+    keyCh!(("PROPOSE_OPERATIONS", bundle+{*newExecuteCh}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       match results {
         String => {

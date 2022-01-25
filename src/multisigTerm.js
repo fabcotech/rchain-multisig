@@ -152,15 +152,6 @@ in {
           stdout!("PROPOSE_OPERATIONS") |
           stdout!(operations) |
           match operations {
-            List => {
-              stdout!("operations is a list") |
-              //checkOperationsCh!((operations, memberId, return2))
-              for (_ <- @(*self, "operations", memberId)) {
-                stdout!("let's save it") |
-                @(*self, "operations", memberId)!(operations) |
-                checkAgreementCh!((operations, return))
-              }
-            }
             Nil => {
               for (_ <- @(*self, "operations", memberId)) {
                 @(*self, "operations", memberId)!(Nil) |
@@ -168,11 +159,9 @@ in {
               }
             }
             _ => {
-              stdout!("operations is a not list, accept anyway") |
               for (_ <- @(*self, "operations", memberId)) {
-                stdout!("let's save it 2") |
                 @(*self, "operations", memberId)!(operations) |
-                checkAgreementCh!((operations, return))
+                checkAgreementCh!((operations, return2))
               }
             }
           }
@@ -383,14 +372,16 @@ in {
     stdout!(operations) |
     match operations {
       // Operation is a list of operations
-      List => {
+      // Array
+      // []
+      [...rest] => {
         stdout!("List") |
         new itCh, ch1 in {
           registryLookup!(\`rho:rchain:revVault\`, *ch1) |
           for (@revAuthKey <<- @(*self, "revAuthKey")) {
             for (@revAddress <<- @(*self, "revAddress")) {
               for (@(_, RevVault) <- ch1) {
-                itCh!(operations) |
+                itCh!(rest) |
                 for (@tmpOperations <= itCh) {
                   match tmpOperations {
                     [] => {
@@ -410,7 +401,7 @@ in {
                         }
                       }
                     }
-                    [first ... rest] => {
+                    [first ... rest2] => {
                       stdout!("first") |
                       stdout!(first) |
                       stdout!("other kind of operation") |
@@ -418,7 +409,7 @@ in {
                         for (ch <<- executeChannelCh) {
                           ch!((0, first, RevVault, revAuthKey, revAddress, *ret)) |
                           for (_ <- ret) {
-                            itCh!(rest)
+                            itCh!(rest2)
                           }
                         }
                       }
@@ -433,7 +424,6 @@ in {
       }
       // operations is a new execute channel
       _ => {
-        stdout!("Not list") |
         for (_ <- executeChannelCh) {
           executeChannelCh!(operations) |
           @return!((true, Nil))

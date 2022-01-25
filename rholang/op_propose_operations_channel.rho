@@ -14,7 +14,7 @@ in {
   } |
 
   for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")) {
-    keyCh!(("PROPOSE_OPERATIONS", *newExecuteCh, bundle+{*returnCh})) |
+    keyCh!(("PROPOSE_OPERATIONS", bundle+{*newExecuteCh}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       match results {
         String => {
