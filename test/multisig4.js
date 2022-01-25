@@ -9,6 +9,7 @@ const getBalance = require('./getBalance').main
 const deployMultisig = require('./test_deployMultisig').main
 const apply = require('./test_apply').main
 const proposeOperations = require('./test_proposeOperations').main
+const proposeOperationsChannel = require('./test_proposeOperationsChannel').main
 
 const PRIVATE_KEY1 = "28a5c9ac133b4449ca38e9bdf7cacdce31079ef6b3ac2f0a080af83ecff98b36"
 const PUBLIC_KEY1 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY1);
@@ -51,6 +52,12 @@ const main = async () => {
   await apply(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1)
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ First application validated, received its OCAP key')
+
+  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
+
+  console.log(proposalAcceptChannel)
+  console.log('----------------------')
+
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
   await apply(multisigRegistryUri, PRIVATE_KEY3, APPLICATION_ID3)
   await apply(multisigRegistryUri, PRIVATE_KEY4, APPLICATION_ID4)

@@ -6,6 +6,8 @@ new
 
   getOperationIdCh,
   validateStringCh,
+  defaultExecuteChannelCh,
+  executeChannelCh,
 
   applicationsCh,
   acceptCh,
@@ -28,6 +30,11 @@ in {
   @(*self, "percentage")!(66) |
   @(*self, "lastExecutedOperations")!({}) |
   @(*self, "members")!(Set()) |
+
+  for (_ <= defaultExecuteChannelCh) {
+    stdout!("don't know how to execute")
+  } |
+  executeChannelCh!(*defaultExecuteChannelCh) |
 
   for (@(str, ret) <= validateStringCh) {
     match (str, Set("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")) {
@@ -140,9 +147,17 @@ in {
       @(*self, "members")!(members.union(Set(memberId))) |
       new keyCh in {
         for (@("PROPOSE_OPERATIONS", operations, return2) <= keyCh) {
+          stdout!("PROPOSE_OPERATIONS") |
+          stdout!(operations) |
           match operations {
             List => {
-              checkOperationsCh!((operations, memberId, return2))
+              stdout!("operations is a list") |
+              //checkOperationsCh!((operations, memberId, return2))
+              for (_ <- @(*self, "operations", memberId)) {
+                stdout!("let's save it") |
+                @(*self, "operations", memberId)!(operations) |
+                checkAgreementCh!((operations, return))
+              }
             }
             Nil => {
               for (_ <- @(*self, "operations", memberId)) {
@@ -151,7 +166,12 @@ in {
               }
             }
             _ => {
-              @return2!("error: operations is not a List")
+              stdout!("operations is a not list, accept anyway") |
+              for (_ <- @(*self, "operations", memberId)) {
+                stdout!("let's save it 2") |
+                @(*self, "operations", memberId)!(operations) |
+                checkAgreementCh!((operations, return))
+              }
             }
           }
         } |
@@ -170,6 +190,9 @@ in {
       }
       { "type": "ACCEPT", "applicationId": String } => {
         @return!(2)
+      }
+      { "type": "KICK", "memberId": String } => {
+        @return!(3)
       }
       _ => {
         @return!(Nil)
@@ -215,6 +238,7 @@ in {
   } |
 
   for (@(operations, return) <= checkAgreementCh) {
+    stdout!("checkAgreementCh") |
     new itCh, howManyCh in {
       howManyCh!(Set()) |
       for (@members <<- @(*self, "members")) {
@@ -224,9 +248,12 @@ in {
             match tmpMembers {
               Set(last) => {
                 for (@op <<- @(*self, "operations", last)) {
+                  stdout!(operations.toByteArray()) |
+                  stdout!(op.toByteArray()) |
                   match operations.toByteArray() == op.toByteArray() {
                     true => {
                       for (@howMany <- howManyCh) {
+                      stdout!((true, howMany.size())) |
                         match howMany.size() + 1 {
                           howMany2 => {
                             match howMany2 * 100 / members.size() >= percentage {
@@ -243,6 +270,9 @@ in {
                     }
                     false => {
                       for (@howMany <- howManyCh) {
+                      stdout!((false, howMany.size())) |
+                        // howMany
+                        // members
                         match howMany.size() * 100 / members.size() >= percentage {
                           true => {
                             executeOperationsCh!((operations, howMany, return))
@@ -345,7 +375,70 @@ in {
   } |
 
   for (@(operations, memberIds, return) <= executeOperationsCh) {
-    new overCh, overItCh, itCh, indexCh, ch1, ch2, ch3 in {
+    stdout!("executeOperationsCh") |
+    stdout!("memberIds") |
+    stdout!(memberIds) |
+    stdout!(operations) |
+    match operations {
+      // Operation is a list of operations
+      List => {
+        stdout!("List") |
+        new itCh, ch1 in {
+          registryLookup!(`rho:rchain:revVault`, *ch1) |
+          for (@revAuthKey <<- @(*self, "revAuthKey")) {
+            for (@revAddress <<- @(*self, "revAddress")) {
+              for (@(_, RevVault) <- ch1) {
+                itCh!(operations) |
+                for (@tmpOperations <= itCh) {
+                  match tmpOperations {
+                    [] => {
+                      stdout!("error: no operations") |
+                      @return!("error: no operations")
+                    }
+                    [last] => {
+                      stdout!("last") |
+                      stdout!(last) |
+                      stdout!("other kind of operation") |
+                      new ret in {
+                        for (ch <<- executeChannelCh) {
+                          ch!((0, last, RevVault, revAuthKey, revAddress, *ret)) |
+                          for (_ <- ret) {
+                            @return!((true, Nil))
+                          }
+                        }
+                      }
+                    }
+                    [first ... rest] => {
+                      stdout!("first") |
+                      stdout!(first) |
+                      stdout!("other kind of operation") |
+                      new ret in {
+                        for (ch <<- executeChannelCh) {
+                          ch!((0, first, RevVault, revAuthKey, revAddress, *ret)) |
+                          for (_ <- ret) {
+                            itCh!(rest)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+        }
+      }
+      // operations is a new execute channel
+      _ => {
+        stdout!("Not list") |
+        for (_ <- executeChannelCh) {
+          executeChannelCh!(operations) |
+          @return!((true, Nil))
+        }
+      }
+    }
+    /* new overCh, overItCh, itCh, indexCh, ch1, ch2, ch3 in {
       for (@v <- overCh) {
         @return!(v) |
         overItCh!(memberIds) |
@@ -421,7 +514,7 @@ in {
           }
         }
       }
-    }
+    } */
   } |
 
   insertArbitrary!(bundle+{*entryCh}, *entryUriCh) |

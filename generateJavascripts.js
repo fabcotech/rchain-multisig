@@ -65,6 +65,20 @@ module.exports.proposeOperationsTerm = (
 `
 );
 
+const proposeOperationsChannelFile = fs
+  .readFileSync('./rholang/op_propose_operations_channel.rho')
+  .toString('utf8');
+fs.writeFileSync(
+  './src/proposeOperationsChannelTerm.js',
+  `/* GENERATED CODE, only edit rholang/*.rho files*/
+module.exports.proposeOperationsChannelTerm = (
+  payload
+) => {
+  return \`${replaceEverything(proposeOperationsChannelFile)}\`;
+};
+`
+);
+
 const readFile = fs
   .readFileSync('./rholang/read.rho')
   .toString('utf8');
