@@ -21,8 +21,12 @@ module.exports.main = async (multisigRegistryUri, lastOperations) => {
     if (!multisigOperations[o]) {
       throw new Error("Missing operation  :" + o)
     }
-    if (multisigOperations[o] !== lastOperations[o]) {
-      throw new Error("Operation result is wrong result, id: " + o + ", expected : " + lastOperations[o] + " received :" + multisigOperations[o])
+    if (multisigOperations[o].toString() !== lastOperations[o].toString()) {
+      console.log('expected :')
+      console.log(lastOperations);
+      console.log('current :')
+      console.log(multisigOperations);
+      throw new Error("Operation result is wrong result " + o)
     }
   })
 

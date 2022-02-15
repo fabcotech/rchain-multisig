@@ -14,8 +14,9 @@ module.exports.read = async () => {
       term: term,
     }
   );
+  console.log(term)
+  console.log(result1)
   const config = rchainToolkit.utils.rhoValToJs(JSON.parse(result1).expr[0]);
-
   console.log(`\n==== Multisig contract ====\n`);
   console.log(`Version              : ${config.version}`);
   if (config.applications.length) {

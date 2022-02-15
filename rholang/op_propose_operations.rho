@@ -8,6 +8,7 @@ in {
   for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")) {
     keyCh!(("PROPOSE_OPERATIONS", OPERATIONSS, bundle+{*returnCh})) |
     for (@results <- returnCh) {
+      stdout!(results) |
       match results {
         String => {
           basket!({ "status": "failed", "error": results })

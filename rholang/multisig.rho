@@ -8,14 +8,10 @@ new
   validateStringCh,
   defaultExecuteChannelCh,
   executeChannelCh,
-
-  applicationsCh,
   acceptCh,
-  checkOperationsCh,
+  emptyOperationsCh,
   checkAgreementCh,
   executeOperationsCh,
-  executeOp1Ch,
-  executeOp2Ch,
 
   self,
 
@@ -26,7 +22,7 @@ new
   blockData(`rho:block:data`)
 in {
 
-  applicationsCh!({}) |
+  @(*self, "applications")!({}) |
   @(*self, "percentage")!(66) |
   @(*self, "lastExecutedOperations")!({}) |
   @(*self, "members")!(Set()) |
@@ -75,7 +71,7 @@ in {
     new ch1, ch2, ch3 in {
       for (@entryUri <<- entryUriCh) {
         for (@members <<- @(*self, "members")) {
-          for (@applications <<- applicationsCh) {
+          for (@applications <<- @(*self, "applications")) {
             for (@revAddress <<- @(*self, "revAddress")) {
               for (@percentage <<- @(*self, "percentage")) {
                 registryLookup!(`rho:rchain:revVault`, *ch1) |
@@ -116,15 +112,15 @@ in {
                 acceptCh!((applicationId, applicationCh, return))
               }
               Int => {
-                for (@applications <- applicationsCh) {
+                for (@applications <- @(*self, "applications")) {
                   match applications.get(applicationId) {
                     Nil => {
                       stdout!("Not first application, will be registered") |
-                      applicationsCh!(applications.set(applicationId, applicationCh)) |
+                      @(*self, "applications")!(applications.set(applicationId, applicationCh)) |
                       @return!((true, "application registered"))
                     }
                     _ => {
-                      applicationsCh!(applications) |
+                      @(*self, "applications")!(applications) |
                       @return!("error: application already exists")
                     }
                   }
@@ -172,60 +168,6 @@ in {
     }
   } |
 
-  for (@(op, return) <= getOperationIdCh) {
-    match op {
-      { "type": "TRANSFER_REV", "amount": Int, "recipient": String } => {
-        @return!(1)
-      }
-      { "type": "ACCEPT", "applicationId": String } => {
-        @return!(2)
-      }
-      { "type": "KICK", "memberId": String } => {
-        @return!(3)
-      }
-      _ => {
-        @return!(Nil)
-      }
-    }
-  } |
-
-  for (@(operations, memberId, return) <= checkOperationsCh) {
-    new itCh, ch1 in {
-      itCh!(operations) |
-      for (@tmpOperations <= itCh) {
-        match tmpOperations {
-          [] => {
-            stdout!("error: no operations") |
-            @return!("error: no operations")
-          }
-          [last] => {
-            getOperationIdCh!((last, *ch1)) |
-            for (@operationId <- ch1) {
-              if (operationId == Nil) {
-                @return!("error: operation is invalid")
-              } else {
-                for (_ <- @(*self, "operations", memberId)) {
-                  @(*self, "operations", memberId)!(operations) |
-                  checkAgreementCh!((operations, return))
-                }
-              }
-            }
-          }
-          [first ... rest] => {
-            getOperationIdCh!((first, *ch1)) |
-            for (@operationId <- ch1) {
-              if (operationId == Nil) {
-                @return!("error: operation is invalid")
-              } else {
-                itCh!(rest)
-              }
-            }
-          }
-        }
-      }
-    }
-  } |
-
   for (@(operations, return) <= checkAgreementCh) {
     stdout!("checkAgreementCh") |
     new itCh, howManyCh in {
@@ -247,7 +189,8 @@ in {
                           howMany2 => {
                             match howMany2 * 100 / members.size() >= percentage {
                               true => {
-                                executeOperationsCh!((operations, howMany.union(Set(last)), return))
+                                executeOperationsCh!((operations, howMany.union(Set(last)))) |
+                                @return!((true, "operations recorded, did execute"))
                               }
                               false => {
                                 @return!((true, "operations recorded, did not execute"))
@@ -297,41 +240,22 @@ in {
     }
   } |
 
-  // ===== OPERATION 1
-  // REV transfer
-  // =================
-  for (@(op, index, RevVault, return) <= executeOp1Ch) {
-    new ch1, ch2, ch3 in {
-      for (@revAddress <<- @(*self, "revAddress")) {
-        for (@revAuthKey <<- @(*self, "revAuthKey")) {
-          @RevVault!("findOrCreate", revAddress, *ch1) |
-          for (@a <- ch1) {
-            match a {
-              (true, multisigPurseVault) => {
-                @multisigPurseVault!("transfer", op.get("recipient"), op.get("amount"), revAuthKey, *ch2) |
-                for (@transferResult <- ch2) {
-                  match transferResult {
-                    (true, Nil) => {
-                      for (@leo <- @(*self, "lastExecutedOperations")) {
-                        @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "success"))
-                      } |
-                      @return!(Nil)
-                    }
-                    (false, message) => {
-                      for (@leo <- @(*self, "lastExecutedOperations")) {
-                        @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, message))
-                      } |
-                      @return!(Nil)
-                    }
-                  }
-                }
-              }
-              _ => {
-                for (@leo <- @(*self, "lastExecutedOperations")) {
-                  @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "error CRITICAL: invalid rev address"))
-                } |
-                @return!(Nil)
-              }
+  for (@memberIds <= emptyOperationsCh) {
+    new itCh in {
+      itCh!(memberIds) |
+      for (@ids <= itCh) {
+        stdout!(("ids", ids)) |
+        match ids {
+          Set() => {}
+          Set(last) => {
+            for (_ <- @(*self, "operations", last)) {
+              @(*self, "operations", last)!(Nil)
+            }
+          }
+          Set(first...rest) => {
+            for (_ <- @(*self, "operations", first)) {
+              @(*self, "operations", first)!(Nil) |
+              itCh!(rest)
             }
           }
         }
@@ -339,75 +263,52 @@ in {
     }
   } |
 
-  // ===== OPERATION 2
-  // Accept application
-  // =================
-  for (@(op, index, return) <= executeOp2Ch) {
-    for (@applications <- applicationsCh) {
-      match applications.get(op.get("applicationId")) {
-        Nil => {
-          applicationsCh!(applications) |
-          for (@leo <- @(*self, "lastExecutedOperations")) {
-            @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application id not found"))
-          } |
-          @return!(Nil)
-        }
-        applicationCh => {
-          applicationsCh!(applications.delete(op.get("applicationId"))) |
-          for (@leo <- @(*self, "lastExecutedOperations")) {
-            @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, "application accepted"))
-          } |
-          acceptCh!((op.get("applicationId"), applicationCh, return))
-        }
-      }
-    }
-  } |
-
-  for (@(operations, memberIds, return) <= executeOperationsCh) {
+  for (@(operations, memberIds) <= executeOperationsCh) {
     stdout!("executeOperationsCh") |
     stdout!("memberIds") |
     stdout!(memberIds) |
     stdout!(operations) |
-    match operations {
-      // Operation is a list of operations
-      // Array
-      // []
-      [...rest] => {
-        stdout!("List") |
-        new itCh, ch1 in {
-          registryLookup!(`rho:rchain:revVault`, *ch1) |
-          for (@revAuthKey <<- @(*self, "revAuthKey")) {
-            for (@revAddress <<- @(*self, "revAddress")) {
-              for (@(_, RevVault) <- ch1) {
-                itCh!(rest) |
-                for (@tmpOperations <= itCh) {
-                  match tmpOperations {
-                    [] => {
-                      stdout!("error: no operations") |
-                      @return!("error: no operations")
-                    }
-                    [last] => {
-                      stdout!("last") |
-                      stdout!(last) |
-                      stdout!("other kind of operation") |
-                      new ret in {
-                        for (ch <<- executeChannelCh) {
-                          ch!((0, last, RevVault, revAuthKey, revAddress, *ret)) |
-                          for (_ <- ret) {
-                            @return!((true, Nil))
+    for (_ <- @(*self, "lastExecutedOperations")) {
+      @(*self, "lastExecutedOperations")!({}) |
+      match operations {
+        [] => {
+          stdout!("error: no operations")
+        }
+        [...rest] => {
+          new itCh, ch1 in {
+            registryLookup!(`rho:rchain:revVault`, *ch1) |
+            for (@revAuthKey <<- @(*self, "revAuthKey")) {
+              for (@revAddress <<- @(*self, "revAddress")) {
+                for (@(_, RevVault) <- ch1) {
+                  itCh!((rest, 0)) |
+                  for (@(tmpOperations, index) <= itCh) {
+                    match tmpOperations {
+                      [] => {
+                        stdout!("error: no operations")
+                      }
+                      [last] => {
+                        new ret in {
+                          for (ch <<- executeChannelCh) {
+                            ch!((index, last, *self, *acceptCh, RevVault, revAuthKey, revAddress, *ret)) |
+                            for (@result <- ret) {
+                              for (@leo <- @(*self, "lastExecutedOperations")) {
+                                @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, result)) |
+                                emptyOperationsCh!(memberIds)
+                              }
+                            }
                           }
                         }
                       }
-                    }
-                    [first ... rest2] => {
-                      stdout!("first") |
-                      stdout!(first) |
-                      stdout!("other kind of operation") |
-                      new ret in {
-                        for (ch <<- executeChannelCh) {
-                          ch!((0, first, RevVault, revAuthKey, revAddress, *ret)) |
-                          for (_ <- ret) {
-                            itCh!(rest2)
+                      [first ... rest2] => {
+                        new ret in {
+                          for (ch <<- executeChannelCh) {
+                            ch!((index, first, *self, *acceptCh, RevVault, revAuthKey, revAddress, *ret)) |
+                            for (@result <- ret) {
+                              for (@leo <- @(*self, "lastExecutedOperations")) {
+                                @(*self, "lastExecutedOperations")!(leo.set("${index}" %% { "index": index }, result)) |
+                                itCh!((rest2, index + 1))
+                              }
+                            }
                           }
                         }
                       }
@@ -417,94 +318,19 @@ in {
               }
             }
           }
-
         }
-      }
-      // operations is a new execute channel
-      _ => {
-        for (_ <- executeChannelCh) {
-          executeChannelCh!(operations) |
-          @return!((true, Nil))
+        // operations is a new execute channel
+        _ => {
+          for (_ <- executeChannelCh) {
+            executeChannelCh!(operations) |
+            for (_ <- @(*self, "lastExecutedOperations")) {
+              @(*self, "lastExecutedOperations")!({ "0": (true, "execute channel updated")}) |
+              emptyOperationsCh!(memberIds)
+            }
+          }
         }
       }
     }
-    /* new overCh, overItCh, itCh, indexCh, ch1, ch2, ch3 in {
-      for (@v <- overCh) {
-        @return!(v) |
-        overItCh!(memberIds) |
-        for (@tmpIds <= overItCh) {
-          match tmpIds {
-            Set(last) => {
-              for (_ <- @(*self, "operations", last)) {
-                @(*self, "operations", last)!(Nil)
-              }
-            }
-            Set(first...rest) => {
-              for (_ <- @(*self, "operations", first)) {
-                @(*self, "operations", first)!(Nil)
-              } |
-              overItCh!(rest)
-            }
-          }
-        }
-      } |
-
-      registryLookup!(`rho:rchain:revVault`, *ch1) |
-      itCh!(operations) |
-      indexCh!(0) |
-      for (_ <- @(*self, "lastExecutedOperations")) {
-        @(*self, "lastExecutedOperations")!({}) |
-        for (@(_, RevVault) <- ch1) {
-          for (@tmpOperations <= itCh) {
-            match tmpOperations {
-              [] => {
-                stdout!("error CRITICAL: no operations") |
-                @return!("error CRITICAL: no operations")
-              }
-              [last] => {
-                for (@index <- indexCh) {
-                  getOperationIdCh!((last, *ch3)) |
-                  for (@operationId <- ch3) {
-                    match operationId {
-                      1 => {
-                        executeOp1Ch!((last, index, RevVault, *ch2)) |
-                        for (_ <- ch2) {
-                          overCh!((true, "operations recorded, did execute"))
-                        }
-                      }
-                      2 => {
-                        executeOp2Ch!((last, index, *ch2)) |
-                        for (_ <- ch2) {
-                          overCh!((true, "operations recorded, did execute"))
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              [first...rest] => {
-                for (@index <- indexCh) {
-                  indexCh!(index + 1) |
-                  getOperationIdCh!((first, *ch3)) |
-                  for (@operationId <- ch3) {
-                    match operationId {
-                      1 => {
-                        executeOp1Ch!((first, index, RevVault, *ch2)) |
-                        for (_ <- ch2) { itCh!(rest) }
-                      }
-                      2 => {
-                        executeOp2Ch!((first, index, *ch2)) |
-                        for (_ <- ch2) { itCh!(rest) }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } */
   } |
 
   insertArbitrary!(bundle+{*entryCh}, *entryUriCh) |

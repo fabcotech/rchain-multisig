@@ -72,13 +72,13 @@ const main = async () => {
 
   await checkLastOperations(multisigRegistryUri, {
     "0": "application id not found",
-    "1": "application accepted",
-    "2": "application accepted",
-    "3": "application accepted",
+    "1": [true, "application accepted"],
+    "2": [true, "application accepted"],
+    "3": [true, "application accepted"],
   })
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2, APPLICATION_ID3]);
 
-  console.log('✓ All 4 identities got their OCAP keys')
+  console.log('✓ All 4 identities are registered got their OCAP keys')
   
   const multisigRevAddress = await getRevAddress(multisigRegistryUri);
 
@@ -138,10 +138,10 @@ const main = async () => {
   await checkMultisigBalance(multisigRegistryUri, 3000 - 1001);
 
   await checkLastOperations(multisigRegistryUri, {
-    "0": "Invalid address length",
-    "1": "Insufficient funds",
-    "2": "success",
-    "3": "success",
+    "0": [false, "Invalid address length"],
+    "1": [false, "Insufficient funds"],
+    "2": [true],
+    "3": [true],
   })
 
   // 25%
@@ -152,12 +152,16 @@ const main = async () => {
   }
   await checkMultisigBalance(multisigRegistryUri, 3000 - 1001);
   await checkLastOperations(multisigRegistryUri, {
-    "0": "Invalid address length",
-    "1": "Insufficient funds",
-    "2": "success",
-    "3": "success",
+    "0": [false, "Invalid address length"],
+    "1": [false, "Insufficient funds"],
+    "2": [true],
+    "3": [true],
   })
   console.log('✓ Proposed again with no execution');
+
+  const OPERATIONS3 = [
+    { "type": "KICK", "memberId": APPLICATION_ID1 },
+  ];
 }
 
 main();
