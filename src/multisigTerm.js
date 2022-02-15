@@ -1,6 +1,6 @@
 /* GENERATED CODE, only edit rholang/*.rho files*/
 module.exports.multisigTerm = (payload) => {
-    return `new 
+    return `new
   basket,
 
   entryCh,
@@ -28,6 +28,7 @@ in {
   @(*self, "percentage")!(66) |
   @(*self, "lastExecutedOperations")!({}) |
   @(*self, "members")!(Set()) |
+  @(*self, "membersKickedOut")!(Set()) |
 
   for (_ <= defaultExecuteChannelCh) {
     stdout!("don't know how to execute")
@@ -114,17 +115,23 @@ in {
                 acceptCh!((applicationId, applicationCh, return))
               }
               Int => {
-                for (@applications <- @(*self, "applications")) {
-                  match applications.get(applicationId) {
-                    Nil => {
-                      stdout!("Not first application, will be registered") |
-                      @(*self, "applications")!(applications.set(applicationId, applicationCh)) |
-                      @return!((true, "application registered"))
+                for (@kicked <<- @(*self, "membersKickedOut"); @members <<- @(*self, "members")) {
+                  if (kicked.contains(applicationId) == false and members.contains(applicationId) == false) {
+                    for (@applications <- @(*self, "applications")) {
+                      match applications.get(applicationId) {
+                        Nil => {
+                          stdout!("Not first application, will be registered") |
+                          @(*self, "applications")!(applications.set(applicationId, applicationCh)) |
+                          @return!((true, "application registered"))
+                        }
+                        _ => {
+                          @(*self, "applications")!(applications) |
+                          @return!("error: application already exists")
+                        }
+                      }
                     }
-                    _ => {
-                      @(*self, "applications")!(applications) |
-                      @return!("error: application already exists")
-                    }
+                  } else {
+                    @return!("member id not available")
                   }
                 }
               }
@@ -145,20 +152,25 @@ in {
       @(*self, "members")!(members.union(Set(memberId))) |
       new keyCh in {
         for (@("PROPOSE_OPERATIONS", operations, return2) <= keyCh) {
-          stdout!("PROPOSE_OPERATIONS") |
-          stdout!(operations) |
-          match operations {
-            Nil => {
-              for (_ <- @(*self, "operations", memberId)) {
-                @(*self, "operations", memberId)!(Nil) |
-                @return2!((true, Nil))
+          for (@members <<- @(*self, "members")) {
+            if (members.contains(memberId)) {
+              match operations {
+                Nil => {
+                  for (_ <- @(*self, "operations", memberId)) {
+                    @(*self, "operations", memberId)!(Nil) |
+                    @return2!((true, Nil))
+                  }
+                }
+                _ => {
+                  for (_ <- @(*self, "operations", memberId)) {
+                    @(*self, "operations", memberId)!(operations) |
+                    checkAgreementCh!((operations, return2))
+                  }
+                }
               }
-            }
-            _ => {
-              for (_ <- @(*self, "operations", memberId)) {
-                @(*self, "operations", memberId)!(operations) |
-                checkAgreementCh!((operations, return2))
-              }
+            } else {
+              stdout!("you have been kicked") |
+              @return2!("member id not found")
             }
           }
         } |
@@ -266,10 +278,6 @@ in {
   } |
 
   for (@(operations, memberIds) <= executeOperationsCh) {
-    stdout!("executeOperationsCh") |
-    stdout!("memberIds") |
-    stdout!(memberIds) |
-    stdout!(operations) |
     for (_ <- @(*self, "lastExecutedOperations")) {
       @(*self, "lastExecutedOperations")!({}) |
       match operations {
@@ -291,7 +299,7 @@ in {
                       [last] => {
                         new ret in {
                           for (ch <<- executeChannelCh) {
-                            ch!((index, last, *self, *acceptCh, RevVault, revAuthKey, revAddress, *ret)) |
+                            ch!((index, last, *self, *acceptCh, RevVault, *ret)) |
                             for (@result <- ret) {
                               for (@leo <- @(*self, "lastExecutedOperations")) {
                                 @(*self, "lastExecutedOperations")!(leo.set("\${index}" %% { "index": index }, result)) |
@@ -304,7 +312,7 @@ in {
                       [first ... rest2] => {
                         new ret in {
                           for (ch <<- executeChannelCh) {
-                            ch!((index, first, *self, *acceptCh, RevVault, revAuthKey, revAddress, *ret)) |
+                            ch!((index, first, *self, *acceptCh, RevVault, *ret)) |
                             for (@result <- ret) {
                               for (@leo <- @(*self, "lastExecutedOperations")) {
                                 @(*self, "lastExecutedOperations")!(leo.set("\${index}" %% { "index": index }, result)) |

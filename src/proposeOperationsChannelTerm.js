@@ -9,26 +9,26 @@ module.exports.proposeOperationsChannelTerm = (
   deployerId(\`rho:rchain:deployerId\`),
   registryLookup(\`rho:registry:lookup\`)
 in {
-  for (@(operationId, op, self, acceptCh, RevVault, revAuthKey, revAddress, return) <= newExecuteCh) {
+  for (@(operationId, op, self, acceptCh, RevVault, return) <= newExecuteCh) {
     // 1
     // 2
     // 3
     stdout!(op) |
     match op.get("type") {
       "TRANSFER_REV" => {
-        stdout!("TRANSFER_REV") |
         new ch1, ch2 in {
-          @RevVault!("findOrCreate", revAddress, *ch1) |
-          for (@a <- ch1) {
-            stdout!("1") |
-            match a {
-              (true, multisigPurseVault) => {
-                stdout!("2") |
-                @multisigPurseVault!("transfer", op.get("recipient"), op.get("amount"), revAuthKey, return)
-              }
-              _ => {
-                stdout!("3") |
-                @return!("failed to get multisig vault")
+          for (@revAddress <<- @(self, "revAddress")) {
+            @RevVault!("findOrCreate", revAddress, *ch1) |
+            for (@a <- ch1) {
+              match a {
+                (true, multisigPurseVault) => {
+                  for (@revAuthKey <<- @(self, "revAuthKey")) {
+                    @multisigPurseVault!("transfer", op.get("recipient"), op.get("amount"), revAuthKey, return)
+                  }
+                }
+                _ => {
+                  @return!("failed to get multisig vault")
+                }
               }
             }
           }
@@ -37,7 +37,6 @@ in {
       "ACCEPT" => {
         stdout!("ACCEPT") |
         for (@applications <<- @(self, "applications")) {
-        stdout!(applications.get(op.get("applicationId"))) |
           for (@members <<- @(self, "members")) {
             match (op.get("applicationId"), applications.get(op.get("applicationId"))) {
               (String, Nil) => {
@@ -58,13 +57,23 @@ in {
           }
         }
       }
-      "APPLY" => {
-        stdout!("APPLY not supported") |
-        @return!((true, Nil))
-      }
-      "KICK" => {
-        stdout!("KICK not supported") |
-        @return!((true, Nil))
+      "KICKOUT" => {
+        stdout!("KICKOUT") |
+        for (@members <<- @(self, "members")) {
+          if (members.contains(op.get("memberId"))) {
+            stdout!("member exists") |
+            for (@members <- @(self, "members")) {
+              @(self, "members")!(members.delete(op.get("memberId"))) |
+              for (@kicked <- @(self, "membersKickedOut")) {
+                stdout!(("kicked", kicked)) |
+                @(self, "membersKickedOut")!(kicked.union(Set(op.get("memberId")))) |
+                @return!((true, Nil))
+              }
+            }
+          } else {
+            @return!("member not found")
+          }
+        }
       }
       _ => {
         stdout!("not supported") |
