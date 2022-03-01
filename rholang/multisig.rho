@@ -148,31 +148,52 @@ in {
   for (@(memberId, applicationCh, return) <= acceptCh) {
     for (@members <- @(*self, "members")) {
       @(*self, "members")!(members.union(Set(memberId))) |
-      new keyCh in {
-        for (@("PROPOSE_OPERATIONS", operations, return2) <= keyCh) {
-          for (@members <<- @(*self, "members")) {
-            if (members.contains(memberId)) {
-              match operations {
-                Nil => {
-                  for (_ <- @(*self, "operations", memberId)) {
-                    @(*self, "operations", memberId)!(Nil) |
-                    @return2!((true, Nil))
-                  }
-                }
-                _ => {
-                  for (_ <- @(*self, "operations", memberId)) {
-                    @(*self, "operations", memberId)!(operations) |
-                    checkAgreementCh!((operations, return2))
-                  }
-                }
+
+      new keyCh, actionCh in {
+        contract actionCh(@("LEAVE", payload, return2)) = {
+          for (@members <- @(*self, "members")) {
+            @(*self, "members")!(members.delete(memberId))
+          } |
+          for (_ <- @(*self, "operations", memberId)) { Nil } |
+          @return2!((true, Nil))
+        } |
+
+        contract actionCh(@("PROPOSE_OPERATIONS", payload, return2)) = {
+          match payload {
+            Nil => {
+              for (_ <- @(*self, "operations", memberId)) {
+                @(*self, "operations", memberId)!(Nil) |
+                @return2!((true, Nil))
               }
-            } else {
-              stdout!("you have been kicked") |
-              @return2!("member id not found")
+            }
+            _ => {
+              for (_ <- @(*self, "operations", memberId)) {
+                @(*self, "operations", memberId)!(payload) |
+                checkAgreementCh!((payload, return2))
+              }
+            }
+          }
+        } |
+  
+        for (@(action, payload, return2) <= keyCh) {
+          for (@revoked <- @(*self, "revoked", memberId)) {
+            match action {
+              "LEAVE" => {
+                actionCh!((action, payload, return2))
+              }
+              "PROPOSE_OPERATIONS" => {
+                @(*self, "revoked", memberId)!(Nil) |
+                actionCh!((action, payload, return2))
+              }
+              _ => {
+                @(*self, "revoked", memberId)!(Nil) |
+                @return2!("unknown action")
+              }
             }
           }
         } |
 
+        @(*self, "revoked", memberId)!(Nil) |
         @(*self, "operations", memberId)!(Nil) |
         @applicationCh!(bundle+{*keyCh}) |
         @return!((true, "application accepted"))
@@ -181,7 +202,6 @@ in {
   } |
 
   for (@(operations, return) <= checkAgreementCh) {
-    stdout!("checkAgreementCh") |
     new itCh, howManyCh in {
       howManyCh!(Set()) |
       for (@members <<- @(*self, "members")) {
@@ -191,6 +211,7 @@ in {
             match tmpMembers {
               Set(last) => {
                 for (@op <<- @(*self, "operations", last)) {
+                  stdout!("let's compare those two operations processes") |
                   stdout!(operations.toByteArray()) |
                   stdout!(op.toByteArray()) |
                   match operations.toByteArray() == op.toByteArray() {
@@ -256,7 +277,6 @@ in {
     new itCh in {
       itCh!(memberIds) |
       for (@ids <= itCh) {
-        stdout!(("ids", ids)) |
         match ids {
           Set() => {}
           Set(last) => {

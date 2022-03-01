@@ -1,14 +1,13 @@
-const { proposeOperationsTerm } = require('../src/');
+const { leaveTerm } = require('../src');
 const rc = require('rchain-toolkit');
 
 module.exports.main = async (
   multisigRegistryUri,
-  privateKey,
-  operations
+  privateKey
 ) => {
-  const term = proposeOperationsTerm({
-    multisigRegistryUri: multisigRegistryUri,
-    operations: operations,
+
+  const term = leaveTerm({
+    multisigRegistryUri: multisigRegistryUri
   });
 
   let dataAtNameResponse;
@@ -19,20 +18,21 @@ module.exports.main = async (
       privateKey,
       1,
       1000000000,
-      40000
+      400000
     );
   } catch (err) {
     console.log(err);
-    throw new Error('get key 01');
+    throw new Error('leave 01');
   }
 
   const data = rc.utils.rhoValToJs(
     JSON.parse(dataAtNameResponse).exprs[0].expr
   );
+  console.log(data);
 
   if (data.status !== 'completed') {
     console.log(data);
-    throw new Error('get key 02');
+    throw new Error('leave 02');
   }
 
   return data;

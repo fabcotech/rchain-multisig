@@ -51,6 +51,20 @@ module.exports.applyTerm = (
 `
 );
 
+const leaveFile = fs
+  .readFileSync('./rholang/op_leave.rho')
+  .toString('utf8');
+fs.writeFileSync(
+  './src/leaveTerm.js',
+  `/* GENERATED CODE, only edit rholang/*.rho files*/
+module.exports.leaveTerm = (
+  payload
+) => {
+  return \`${replaceEverything(leaveFile)}\`;
+};
+`
+);
+
 const proposeOperationsFile = fs
   .readFileSync('./rholang/op_propose_operations.rho')
   .toString('utf8');

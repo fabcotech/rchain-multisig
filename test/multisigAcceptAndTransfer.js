@@ -43,9 +43,7 @@ const main = async () => {
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000); */
   console.log('✓ Initialized tests with 3 REV transfers')
 
-  const result = await deployMultisig(PRIVATE_KEY1, [
-    PUBLIC_KEY1,PUBLIC_KEY2,PUBLIC_KEY3,PUBLIC_KEY4
-  ]);
+  const result = await deployMultisig(PRIVATE_KEY1);
 
   const multisigRegistryUri = result.registryUri.replace('rho:id:', '');
 
@@ -54,21 +52,19 @@ const main = async () => {
   console.log('✓ First application validated, received its OCAP key')
 
   const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
-
-  console.log(proposalAcceptChannel)
-  console.log('----------------------')
+  console.log('✓ channel updated');
 
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
   await apply(multisigRegistryUri, PRIVATE_KEY3, APPLICATION_ID3)
   await apply(multisigRegistryUri, PRIVATE_KEY4, APPLICATION_ID4)
 
-  const OPERATIONS_ACCEPT = [
+  const operationsShouldBeAccepted = [
     { "type": "ACCEPT", "applicationId": "doesnotexist" },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID2 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID3 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID4 }
   ];
-  const proposalAccept = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS_ACCEPT);
+  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted);
 
   await checkLastOperations(multisigRegistryUri, {
     "0": "application id not found",

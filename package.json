@@ -6,7 +6,8 @@
   "scripts": {
     "generate": "node generateJavascripts",
     "test:acceptandtransfer": "node test/multisigAcceptAndTransfer.js",
-    "test:kickout": "node test/multisigKickout.js"
+    "test:kickout": "node test/multisigKickout.js",
+    "test:leave": "node test/multisigLeave.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,7 @@
   "homepage": "https://github.com/fabcotech/rchain-multisig#readme",
   "dependencies": {
     "dotenv": "6.2.0",
-    "rchain-toolkit": "0.4.5"
+    "rchain-toolkit": "0.4.6"
   },
   "devDependencies": {}
 }

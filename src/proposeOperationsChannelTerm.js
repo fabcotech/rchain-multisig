@@ -35,12 +35,10 @@ in {
         }
       }
       "ACCEPT" => {
-        stdout!("ACCEPT") |
         for (@applications <<- @(self, "applications")) {
           for (@members <<- @(self, "members")) {
             match (op.get("applicationId"), applications.get(op.get("applicationId"))) {
               (String, Nil) => {
-                stdout!("not found") |
                 @return!("application id not found")
               }
               (String, applicationCh) => {
@@ -50,7 +48,6 @@ in {
                 }
               }
               _ => {
-                stdout!("not found") |
                 @return!("application id not found")
               }
             }
@@ -58,16 +55,16 @@ in {
         }
       }
       "KICKOUT" => {
-        stdout!("KICKOUT") |
         for (@members <<- @(self, "members")) {
           if (members.contains(op.get("memberId"))) {
-            stdout!("member exists") |
-            for (@members <- @(self, "members")) {
-              @(self, "members")!(members.delete(op.get("memberId"))) |
-              for (@kicked <- @(self, "membersKickedOut")) {
-                stdout!(("kicked", kicked)) |
-                @(self, "membersKickedOut")!(kicked.union(Set(op.get("memberId")))) |
-                @return!((true, Nil))
+            for (_ <- @(self, "revoked", op.get("memberId"))) {
+              for (@members <- @(self, "members")) {
+                @(self, "members")!(members.delete(op.get("memberId"))) |
+                for (@kicked <- @(self, "membersKickedOut")) {
+                  @(self, "membersKickedOut")!(kicked.union(Set(op.get("memberId")))) |
+                  for (_ <- @(self, "operations", op.get("memberId"))) { Nil } |
+                  @return!((true, Nil))
+                }
               }
             }
           } else {
