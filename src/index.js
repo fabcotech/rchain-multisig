@@ -1,4 +1,5 @@
 const { multisigTerm } = require('./multisigTerm');
+const { mintTerm } = require('./mintTerm');
 const { applyTerm } = require('./applyTerm');
 const { leaveTerm } = require('./leaveTerm');
 const { proposeOperationsTerm } = require('./proposeOperationsTerm');
@@ -9,6 +10,7 @@ const { readOperationsTerm } = require('./readOperationsTerm');
 
 module.exports = {
   multisigTerm,
+  mintTerm,
   applyTerm,
   leaveTerm,
   proposeOperationsTerm,

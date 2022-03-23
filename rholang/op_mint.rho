@@ -1,0 +1,12 @@
+new basket,
+  mintEntryCh,
+  stdout(`rho:io:stdout`),
+  registryLookup(`rho:registry:lookup`)
+in {
+
+  registryLookup!(`rho:id:MINT_MULTISIG_REGISTRY_URI`, *mintEntryCh) |
+
+  for (mint <- mintEntryCh) {
+    mint!(*basket)
+  }
+}

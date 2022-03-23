@@ -11,6 +11,7 @@ const replaceEverything = (a) => {
       .replace(/APPLICATION_ID/g, '${payload.applicationId}')
       .replace(/MEMBER_ID/g, '${payload.memberId}')
       .replace(/SIGNATURE/g, '${payload.signature}')
+      .replace(/MINT_MULTISIG_REGISTRY_URI/g, '${payload.mintMultisigRegistryUri}')
       .replace(/MULTISIG_REGISTRY_URI/g, '${payload.multisigRegistryUri}')
       .replace(
         'OPERATIONSS',
@@ -18,6 +19,7 @@ const replaceEverything = (a) => {
       )
   );
 };
+
 
 const multisigTerm = fs.readFileSync('./rholang/multisig.rho').toString('utf8');
 
@@ -33,6 +35,20 @@ module.exports.multisigTerm = (payload) => {
       .replace(/PUBLIC_KEYS/g, 'Set(${payload.publicKeys.map(pk => \'"\' + pk + \'"\').join(",")})')
       .replace(/DEPTH_CONTRACT/g, '${payload.contractDepth || 2}')
       .replace(/DEPTH/g, '${payload.depth || 3}')}\`;
+};
+`
+);
+
+const mintFile = fs
+  .readFileSync('./rholang/op_mint.rho')
+  .toString('utf8');
+fs.writeFileSync(
+  './src/mintTerm.js',
+  `/* GENERATED CODE, only edit rholang/*.rho files*/
+module.exports.mintTerm = (
+  payload
+) => {
+  return \`${replaceEverything(mintFile)}\`;
 };
 `
 );

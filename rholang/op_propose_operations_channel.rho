@@ -6,11 +6,23 @@ new basket,
   registryLookup(`rho:registry:lookup`)
 in {
   for (@(operationId, op, self, acceptCh, RevVault, return) <= newExecuteCh) {
-    // 1
-    // 2
-    // 3
+
     stdout!(op) |
     match op.get("type") {
+      "MINT_MULTISIG" => {
+        new ch1, ch2 in {
+          registryLookup!(op.get("mintRegistryUri"), *ch1) |
+         
+          for (mintCh <- ch1) {
+            mintCh!(*ch2) |
+            for (result <- ch2) {
+              Nil
+              // APPLY
+              // store registry uri of new multisig in self
+            }
+          }
+        }
+      }
       "TRANSFER_REV" => {
         new ch1, ch2 in {
           for (@revAddress <<- @(self, "revAddress")) {

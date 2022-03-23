@@ -11,9 +11,11 @@ module.exports.applyTerm = (
   registryLookup(\`rho:registry:lookup\`)
 in {
 
+  stdout!("${payload.applicationId}") |
   registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
+    stdout!("PUBLIC_APPLY") |
     masterEntry!(("PUBLIC_APPLY", "${payload.applicationId}", bundle+{*applicationCh}, bundle+{*resultCh})) |
 
     // application accepted
