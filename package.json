@@ -1,13 +1,14 @@
 {
   "name": "rchain-multisig",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Multisig wallet on RChain",
   "main": "src/index.js",
   "scripts": {
     "generate": "node generateJavascripts",
     "test:acceptandtransfer": "node test/multisigAcceptAndTransfer.js",
     "test:kickout": "node test/multisigKickout.js",
-    "test:leave": "node test/multisigLeave.js"
+    "test:leave": "node test/multisigLeave.js",
+    "test:recursive": "node test/multisigRecursive.js"
   },
   "repository": {
     "type": "git",

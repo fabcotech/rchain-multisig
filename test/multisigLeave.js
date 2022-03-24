@@ -1,10 +1,13 @@
 const rc = require('rchain-toolkit');
 
+require('dotenv').config();
+
 const checkMembers = require('./checkMembers').main
 const deployMultisig = require('./test_deployMultisig').main
 const apply = require('./test_apply').main
 const leave = require('./test_leave').main
 const transferRev = require('./transferRev').main
+const mint = require('./test_mint').main;
 const proposeOperations = require('./test_proposeOperations').main
 const proposeOperationsChannel = require('./test_proposeOperationsChannel').main
 
@@ -21,15 +24,15 @@ const APPLICATION_ID2 = PUBLIC_KEY2.slice(0, 5);
 const main = async () => {
   console.log('Starting tests, make sure those following REV addresses have REV :')
   console.log('(you may uncomment lines 40-42 to transfer REV)')
-  console.log(ADDRESS1);
-  console.log(ADDRESS2);
 
   /* await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000); */
   console.log('✓ Initialized tests with 3 REV transfers')
 
   const result = await deployMultisig(PRIVATE_KEY1);
+  const mintRegistryUri = result.registryUri.replace('rho:id:', '');
 
-  const multisigRegistryUri = result.registryUri.replace('rho:id:', '');
+  const result2 = await mint(PRIVATE_KEY1, mintRegistryUri);
+  const multisigRegistryUri = result2.registryUri.replace('rho:id:', '');
 
   await apply(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1)
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
@@ -57,16 +60,15 @@ const main = async () => {
   const OPERATIONS_GOING_NOWHERE = [
     { "type": "ACCEPT", "applicationId": "doesnotexist" }
   ];
-  let operationsGoingNowhere;
-  try {
-    operationsGoingNowhere = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS_GOING_NOWHERE);
-  } catch (err) {
-    console.log('✓ User 2 has no capability anymore');
-    process.exit()
-    return;
-  }
-  console.log(operationsGoingNowhere);
-  throw new Error('Operations should have been going nowhere')
+
+  proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS_GOING_NOWHERE)
+    .then(() => {
+      throw new Error('Operations should have gone nowhere')
+    })
+    .catch(err => {
+      console.log('✓ User 2 has no capability anymore');
+      process.exit()
+    })
 }
 
 main();

@@ -51,11 +51,30 @@ in {
       self
     in {
 
-      @(*self, "applications")!({}) |
       @(*self, "percentage")!(66) |
+
+      // Pending applications, UnforgeableName is the channel
+      // where the OCAP key is sent once application is accepted
+      // { "apesmultisig": UnforgeableName<abcdef>}
+      @(*self, "applications")!({}) |
+
       @(*self, "lastExecutedOperations")!({}) |
+
+      // Set of the multisig's member ids 
+      // Set("charles", "olga", "apesmultisig")
       @(*self, "members")!(Set()) |
+
+      // Set of the member ids that have been kicked or left
+      // Set("bob", "mike")
       @(*self, "membersKickedOut")!(Set()) |
+
+      // Stores memberships in other multisigs (recursiveness)
+      // { "1": (\`rho:id:abcdefgh\`, "bob") }
+      @(*self, "multisigMemberships")!({}) |
+
+      // Stores OCAP keys for each membership
+      // { "1": UnforgeableName<abdbeg> }
+      @(*self, "multisigMembershipsKeys")!({}) |
 
       for (_ <= defaultExecuteChannelCh) {
         stdout!("don't know how to execute")
@@ -81,21 +100,24 @@ in {
               for (@applications <<- @(*self, "applications")) {
                 for (@revAddress <<- @(*self, "revAddress")) {
                   for (@percentage <<- @(*self, "percentage")) {
-                    registryLookup!(\`rho:rchain:revVault\`, *ch1) |
-                    for (@(_, RevVault) <- ch1) {
-                      @RevVault!("findOrCreate", revAddress, *ch2) |
-                      for (@(true, revVault) <- ch2) {
-                        @revVault!("balance", *ch3) |
-                        for (@balance <- ch3) {
-                          @return!({
-                            "multisigRegistryUri": entryUri,
-                            "revAddress": revAddress,
-                            "revBalance": balance,
-                            "members": members,
-                            "applications": applications.keys(),
-                            "version": "0.1.0",
-                            "percentage": percentage,
-                          })
+                    for (@memberships <<- @(*self, "multisigMemberships")) {
+                      registryLookup!(\`rho:rchain:revVault\`, *ch1) |
+                      for (@(_, RevVault) <- ch1) {
+                        @RevVault!("findOrCreate", revAddress, *ch2) |
+                        for (@(true, revVault) <- ch2) {
+                          @revVault!("balance", *ch3) |
+                          for (@balance <- ch3) {
+                            @return!({
+                              "multisigRegistryUri": entryUri,
+                              "revAddress": revAddress,
+                              "revBalance": balance,
+                              "members": members,
+                              "applications": applications.keys(),
+                              "version": "0.1.0",
+                              "percentage": percentage,
+                              "multisigMemberships": memberships,
+                            })
+                          }
                         }
                       }
                     }

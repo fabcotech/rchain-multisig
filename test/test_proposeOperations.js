@@ -23,7 +23,7 @@ module.exports.main = async (
     );
   } catch (err) {
     console.log(err);
-    throw new Error('get key 01');
+    throw err;
   }
 
   const data = rc.utils.rhoValToJs(

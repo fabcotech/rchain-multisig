@@ -2,12 +2,9 @@ const { multisigTerm } = require('../src');
 const rc = require('rchain-toolkit');
 
 module.exports.main = async (
-  privateKey1,
-  publicKeys,
+  privateKey1
 ) => {
-  const term = multisigTerm({
-    publicKeys: publicKeys,
-  });
+  const term = multisigTerm();
 
   let dataAtNameResponse;
   try {

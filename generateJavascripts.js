@@ -15,7 +15,7 @@ const replaceEverything = (a) => {
       .replace(/MULTISIG_REGISTRY_URI/g, '${payload.multisigRegistryUri}')
       .replace(
         'OPERATIONSS',
-        `\${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil')}`
+        `\${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil').replace(/"\\\$BQ/g, '\`').replace(/\\\$BQ"/g, '\`')}`
       )
   );
 };

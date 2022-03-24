@@ -13,16 +13,83 @@ in {
 
     stdout!(op) |
     match op.get("type") {
+      "JOIN_MULTISIG" => {
+        new ch1, ch2, ch3 in {
+          // APPLY to the multisig
+          registryLookup!(op.get("registryUri"), *ch1) |
+          for (masterEntry <- ch1) {
+            masterEntry!(("PUBLIC_APPLY", op.get("applicationId"), bundle+{*ch2}, bundle+{return})) |
+
+            for (@key <- ch2) {
+              for (@multisigMemberships <- @(self, "multisigMemberships")) {
+                ch3!("\${newIndex}" %% { "newIndex": multisigMemberships.keys().size() + 1 }) |
+                for (@newIndex <- ch3) {
+
+                  // store the registry URI and member id
+                  @(self, "multisigMemberships")!(
+                    multisigMemberships.set(
+                      newIndex,
+                      (op.get("registryUri"), op.get("applicationId"))
+                    )
+                  ) |
+
+                  // store the OCAP key
+                  for (@multisigMembershipsKeys <- @(self, "multisigMembershipsKeys")) {
+                    @(self, "multisigMembershipsKeys")!(
+                      multisigMembershipsKeys.set(
+                        newIndex,
+                        key
+                      )
+                    )
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
       "MINT_MULTISIG" => {
-        new ch1, ch2 in {
-          registryLookup!(op.get("mintRegistryUri"), *ch1) |
-         
+        new ch1, ch2, ch3, ch4, ch5, ch6 in {
+          registryLookup!(op.get("mintRegistryUri"), *ch1) |         
           for (mintCh <- ch1) {
             mintCh!(*ch2) |
-            for (result <- ch2) {
-              Nil
-              // APPLY
-              // store registry uri of new multisig in self
+            for (@result <- ch2) {
+
+              // Instantly APPLY
+              registryLookup!(result.get("registryUri"), *ch3) |
+              for (masterEntry <- ch3) {
+                masterEntry!(("PUBLIC_APPLY", op.get("applicationId"), bundle+{*ch4}, bundle+{*ch5})) |
+
+                // application should be instantly accepted
+                for (@key <- ch4) {
+                  @return!((true, Nil)) |
+
+                  for (@multisigMemberships <- @(self, "multisigMemberships")) {
+                    ch6!("\${newIndex}" %% { "newIndex": multisigMemberships.keys().size() + 1 }) |
+                    for (@newIndex <- ch6) {
+                      stdout!(("newIndex", newIndex)) |
+
+                      // store the registry URI and member id
+                      @(self, "multisigMemberships")!(
+                        multisigMemberships.set(
+                          newIndex,
+                          (result.get("registryUri"), op.get("applicationId"))
+                        )
+                      ) |
+
+                      // store the OCAP key
+                      for (@multisigMembershipsKeys <- @(self, "multisigMembershipsKeys")) {
+                        @(self, "multisigMembershipsKeys")!(
+                          multisigMembershipsKeys.set(
+                            newIndex,
+                            key
+                          )
+                        )
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }

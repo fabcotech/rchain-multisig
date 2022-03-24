@@ -10,11 +10,15 @@ RChain multisig is very simple, members can propose operations, when at least 66
 
 ```
 # Deploy an empty multisig
-node cli deploy-multisig
+node cli deploy-multisig-mint
+node cli mint-multisig
 
 # Join the multisig
 # 1st application is automatically accepted
 node cli apply --application-id bob
+
+# Propose the default implementation of the multisig
+node cli propose-operations-channel
 
 # Read the informations of the multisig
 node cli read

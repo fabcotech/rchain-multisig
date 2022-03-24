@@ -10,7 +10,7 @@ module.exports.proposeOperationsTerm = (
 in {
 
   for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")) {
-    keyCh!(("PROPOSE_OPERATIONS", ${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil')}, bundle+{*returnCh})) |
+    keyCh!(("PROPOSE_OPERATIONS", ${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil').replace(/"\$BQ/g, '`').replace(/\$BQ"/g, '`')}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!(results) |
       match results {

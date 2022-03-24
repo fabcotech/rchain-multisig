@@ -1,6 +1,8 @@
-const { deployMultisig } = require('./cli/deployMultisig');
+const { deployMultisigMint } = require('./cli/deployMultisigMint');
+const { mintMultisig } = require('./cli/mintMultisig');
 const { apply } = require('./cli/apply');
 const { proposeOperations } = require('./cli/proposeOperations');
+const { proposeOperationsChannel } = require('./cli/proposeOperationsChannel');
 const { read } = require('./cli/read');
 const { readLastExecutedOperations } = require('./cli/readLastExecutedOperations');
 const { readOperations } = require('./cli/readOperations');
@@ -33,10 +35,17 @@ const main = async () => {
     return;
   }
 
-  const deployMultisigArg =
-    process.argv.findIndex((arg) => arg === 'deploy-multisig') !== -1;
-  if (deployMultisigArg) {
-    deployMultisig();
+  const mintMultisigArg =
+    process.argv.findIndex((arg) => arg === 'mint-multisig') !== -1;
+  if (mintMultisigArg) {
+    mintMultisig();
+    return;
+  }
+
+  const deployMultisigMintArg =
+    process.argv.findIndex((arg) => arg === 'deploy-multisig-mint') !== -1;
+  if (deployMultisigMintArg) {
+    deployMultisigMint();
     return;
   }
 
@@ -44,6 +53,13 @@ const main = async () => {
     process.argv.findIndex((arg) => arg === 'apply') !== -1;
   if (applyArg) {
     apply();
+    return;
+  }
+
+  const proposeOperationsChannelArg =
+  process.argv.findIndex((arg) => arg === 'propose-operations-channel') !== -1;
+  if (proposeOperationsChannelArg) {
+    proposeOperationsChannel();
     return;
   }
 

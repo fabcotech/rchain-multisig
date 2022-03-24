@@ -1,18 +1,24 @@
 const rchainToolkit = require('rchain-toolkit');
 const fs = require('fs');
 
-const { multisigTerm } = require('../src/multisigTerm');
+const { mintTerm } = require('../src/');
 const {
   log,
 } = require('./utils');
 
-module.exports.deployMultisig = async () => {
+module.exports.mintMultisig = async () => {
+  if (typeof process.env.MULTISIG_MINT_REGISTRY_URI !== 'string') {
+    console.log('Please reploy a multisig mint first, or reference MULTISIG_MINT_REGISTRY_URI in .env file');
+    process.exit();
+  }
   if (typeof process.env.MULTISIG_REGISTRY_URI === 'string') {
     console.log('Please remove MULTISIG_REGISTRY_URI=* line in .env file');
     process.exit();
   }
 
-  const term = multisigTerm({});
+  const term = mintTerm( {
+    mintMultisigRegistryUri: process.env.MULTISIG_MINT_REGISTRY_URI
+  });
 
   let dataAtNameResponse;
   try {
@@ -34,11 +40,11 @@ module.exports.deployMultisig = async () => {
   const data = rchainToolkit.utils.rhoValToJs(
     JSON.parse(dataAtNameResponse).exprs[0].expr
   );
-  console.log(data);
+
   let envText = fs.readFileSync('./.env', 'utf8');
   envText += `\nMULTISIG_REGISTRY_URI=${data.registryUri.replace('rho:id:', '')}`;
   fs.writeFileSync('./.env', envText, 'utf8');
-  log('✓ deployed multisig and retrieved data from the blockchain');
+  log('✓ deployed multisig');
   log(
     `✓ updated .env file with MULTISIG_REGISTRY_URI=${data.registryUri.replace(
       'rho:id:',

@@ -7,11 +7,9 @@ new basket,
   registryLookup(`rho:registry:lookup`)
 in {
 
-  stdout!("APPLICATION_ID") |
   registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
 
   for (masterEntry <= masterEntryCh) {
-    stdout!("PUBLIC_APPLY") |
     masterEntry!(("PUBLIC_APPLY", "APPLICATION_ID", bundle+{*applicationCh}, bundle+{*resultCh})) |
 
     // application accepted

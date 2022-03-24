@@ -1,7 +1,5 @@
 const rchainToolkit = require('rchain-toolkit');
 
-require('dotenv').config();
-
 module.exports.main = async (privateKey, from, to, amount) => {
   let term = `new
   basket,

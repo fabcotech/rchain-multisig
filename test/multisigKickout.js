@@ -1,11 +1,14 @@
 const rc = require('rchain-toolkit');
 
-const checkLastOperations = require('./checkLastOperations').main
-const checkMembers = require('./checkMembers').main
-const deployMultisig = require('./test_deployMultisig').main
-const apply = require('./test_apply').main
-const proposeOperations = require('./test_proposeOperations').main
-const proposeOperationsChannel = require('./test_proposeOperationsChannel').main
+require('dotenv').config();
+
+const checkLastOperations = require('./checkLastOperations').main;
+const checkMembers = require('./checkMembers').main;
+const deployMultisig = require('./test_deployMultisig').main;
+const apply = require('./test_apply').main;
+const mint = require('./test_mint').main;
+const proposeOperations = require('./test_proposeOperations').main;
+const proposeOperationsChannel = require('./test_proposeOperationsChannel').main;
 
 const PRIVATE_KEY1 = "28a5c9ac133b4449ca38e9bdf7cacdce31079ef6b3ac2f0a080af83ecff98b36"
 const PUBLIC_KEY1 = rc.utils.publicKeyFromPrivateKey(PRIVATE_KEY1);
@@ -30,18 +33,17 @@ const APPLICATION_ID4 = PUBLIC_KEY4.slice(0, 5);
 const main = async () => {
   console.log('Starting tests, make sure those following REV addresses have REV :')
   console.log('(you may uncomment lines 40-42 to transfer REV)')
-  console.log(ADDRESS1);
-  console.log(ADDRESS2);
-  console.log(ADDRESS3);
-  console.log(ADDRESS4);
+
   /* await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000);
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS3, 1000000000);
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000); */
   console.log('✓ Initialized tests with 3 REV transfers')
 
   const result = await deployMultisig(PRIVATE_KEY1);
+  const mintRegistryUri = result.registryUri.replace('rho:id:', '');
 
-  const multisigRegistryUri = result.registryUri.replace('rho:id:', '');
+  const result2 = await mint(PRIVATE_KEY1, mintRegistryUri);
+  const multisigRegistryUri = result2.registryUri.replace('rho:id:', '');
 
   await apply(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1)
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
@@ -95,13 +97,14 @@ const main = async () => {
 
   // 75%
   const proposalkick3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS3);
-  console.log(proposalkick3)
+
   if (proposalkick3.message !== "operations recorded, did execute") {
     throw new Error('proposal kickout 4, expected "operations recorded, did execute"')
   }
   console.log('✓ Proposal kickout 3')
 
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2, APPLICATION_ID3])
+  console.log('✓ member 3 is no longer part of multisig');
 }
 
 main();

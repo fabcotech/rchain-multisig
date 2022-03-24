@@ -1,15 +1,14 @@
 const rchainToolkit = require('rchain-toolkit');
 
-const { proposeOperationsTerm } = require('../src/proposeOperationsTerm');
+const { proposeOperationsChannelTerm } = require('../src/');
 
-const { log, getMultisigRegistryUri, getOperationsFile } = require('./utils');
+const { log, getMultisigRegistryUri } = require('./utils');
 
-module.exports.proposeNewExecuteChannel = async () => {
-  const multisigRegistryUri = getMultisigRegistryUri();
+module.exports.proposeOperationsChannel = async () => {
 
-  const operations =  JSON.parse(getOperationsFile());
-
-  const term = proposeOperationsTerm({ multisigRegistryUri: multisigRegistryUri, operations: operations.operations });
+  const term = proposeOperationsChannelTerm({
+    multisigRegistryUri: getMultisigRegistryUri(),
+  });
 
   let dataAtNameResponse;
   try {
@@ -29,7 +28,6 @@ module.exports.proposeNewExecuteChannel = async () => {
   const data = rchainToolkit.utils.rhoValToJs(
     JSON.parse(dataAtNameResponse).exprs[0].expr
   );
-  console.log(data);
 
   if (data.status !== "completed") {
     console.log(data);
