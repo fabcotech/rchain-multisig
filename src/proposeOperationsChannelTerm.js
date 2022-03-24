@@ -12,6 +12,7 @@ in {
   for (@(operationId, op, self, acceptCh, RevVault, return) <= newExecuteCh) {
 
     stdout!(op) |
+
     match op.get("type") {
       "JOIN_MULTISIG" => {
         new ch1, ch2, ch3 in {
@@ -67,7 +68,6 @@ in {
                   for (@multisigMemberships <- @(self, "multisigMemberships")) {
                     ch6!("\${newIndex}" %% { "newIndex": multisigMemberships.keys().size() + 1 }) |
                     for (@newIndex <- ch6) {
-                      stdout!(("newIndex", newIndex)) |
 
                       // store the registry URI and member id
                       @(self, "multisigMemberships")!(
@@ -152,7 +152,7 @@ in {
         }
       }
       _ => {
-        stdout!("not supported") |
+        stdout!("Error: operation not supported") |
         @return!((true, Nil))
       }
     }
