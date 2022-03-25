@@ -49,11 +49,13 @@ Leaving a multisig is of course not conditionned to members voting, anyone can l
 
 Currently five operations are available in the defautl implementation, check `rholang/op_propose_operations_channel.rho` to understand further. 66% or more of the members must agree on the set of operations to execute, and on the same order, for the operations to effectively execute.
 
-`ACCEPT`        : vote on accepting a pending application, and turn it into a membership
-`KICKOUT`       : vote on kicking a member out of the multisig
-`TRANSFER_REV`  : vote on tranfering REV from the vault of the multisig
-`MINT_MULTISIG` : vote on minting a new multisig 2 through multisig 1, and instantly applying to it
-`JOIN_MULTISIG` : vote on joining an existing multisig 2 through multisig 1
+```
+ACCEPT        : vote on accepting a pending application, and turn it into a membership
+KICKOUT       : vote on kicking a member out of the multisig
+TRANSFER_REV  : vote on tranfering REV from the vault of the multisig
+MINT_MULTISIG : vote on minting a new multisig 2 through multisig 1, and instantly applying to it
+JOIN_MULTISIG : vote on joining an existing multisig 2 through multisig 1
+```
 
 #### Testing
 
