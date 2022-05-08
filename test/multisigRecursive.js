@@ -6,6 +6,7 @@ const checkLastOperations = require('./checkLastOperations').main
 const checkMembers = require('./checkMembers').main;
 const deployMultisig = require('./test_deployMultisig').main;
 const apply = require('./test_apply').main;
+const transferRev = require('./transferRev').main
 const mint = require('./test_mint').main;;
 const proposeOperations = require('./test_proposeOperations').main;
 const proposeOperationsChannel = require('./test_proposeOperationsChannel').main;

@@ -1,4 +1,4 @@
-const rchainToolkit = require('rchain-toolkit');
+const rchainToolkit = require('@fabcotech/rchain-toolkit');
 const fs = require('fs');
 
 const { multisigTerm } = require('../src/multisigTerm');
@@ -18,11 +18,14 @@ module.exports.deployMultisigMint = async () => {
   try {
     dataAtNameResponse = await rchainToolkit.http.easyDeploy(
       process.env.VALIDATOR_HOST,
-      term,
-      process.env.PRIVATE_KEY,
-      1,
-      10000000,
-      10 * 60 * 1000
+      {
+        privateKey: process.env.PRIVATE_KEY,
+        shardId: process.env.SHARD_ID,
+        term: term,
+        phloPrice: 1,
+        phloLimit: 10000000,
+        timeout: 3 * 60 * 1000
+      }
     );
     console.log(dataAtNameResponse)
   } catch (err) {

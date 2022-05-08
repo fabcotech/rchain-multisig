@@ -1,4 +1,4 @@
-const rchainToolkit = require('rchain-toolkit');
+const rchainToolkit = require('@fabcotech/rchain-toolkit');
 
 const { readTerm } = require('../src/readTerm');
 
@@ -32,6 +32,14 @@ module.exports.read = async () => {
   Object.keys(config.members).forEach(pk => {
     console.log(`  ${config.members[pk]}`)
   });
+
+  if (Object.keys(config.applications).length) {
+    console.log(`\nPending applications           :`);
+    Object.keys(config.applications).forEach(pk => {
+      console.log(`  ${config.applications[pk]}`)
+    });
+
+  }
 
   if (Object.keys(config.multisigMemberships).length > 0) {
     console.log(`\nMemberships in other multisigs :`);

@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const checkLastOperations = require('./checkLastOperations').main;
 const checkMembers = require('./checkMembers').main;
+const transferRev = require('./transferRev').main
 const deployMultisig = require('./test_deployMultisig').main;
 const apply = require('./test_apply').main;
 const mint = require('./test_mint').main;
