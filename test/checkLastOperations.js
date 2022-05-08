@@ -1,4 +1,4 @@
-const rc = require('rchain-toolkit');
+const rc = require('@fabcotech/rchain-toolkit');
 const { readLastExecutedOperationsTerm } = require('../src/');
 
 module.exports.main = async (multisigRegistryUri, lastOperations) => {

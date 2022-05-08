@@ -1,12 +1,10 @@
-const rc = require('rchain-toolkit');
+const rc = require('@fabcotech/rchain-toolkit');
 
-module.exports.main = async (publicKey) => {
+module.exports.main = async (revAddress) => {
   const term = `new return, rl(\`rho:registry:lookup\`), RevVaultCh, vaultCh, balanceCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     for (@(_, RevVault) <- RevVaultCh) {
-      @RevVault!("findOrCreate", "${rc.utils.revAddressFromPublicKey(
-        publicKey
-      )}", *vaultCh) |
+      @RevVault!("findOrCreate", "${revAddress}", *vaultCh) |
       for (@(true, vault) <- vaultCh) {
         @vault!("balance", *balanceCh) |
         for (@balance <- balanceCh) { return!(balance) }

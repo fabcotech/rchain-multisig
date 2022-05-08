@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/fabcotech/rchain-multisig#readme",
   "dependencies": {
-    "dotenv": "6.2.0",
-    "rchain-toolkit": "0.4.6"
-  },
-  "devDependencies": {}
+    "@fabcotech/dappy-cli": "^16.4.0",
+    "@fabcotech/rchain-toolkit": "2.0.0",
+    "dotenv": "6.2.0"
+  }
 }

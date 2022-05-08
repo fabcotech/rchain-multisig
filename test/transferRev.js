@@ -1,6 +1,15 @@
-const rchainToolkit = require('rchain-toolkit');
+const rchainToolkit = require('@fabcotech/rchain-toolkit');;
+const getBalance = require('./getBalance').main;
 
 module.exports.main = async (privateKey, from, to, amount) => {
+
+  const b1 = await getBalance(to);
+  if (b1 < 100000000) {
+    console.log(to, 'has less than 1 REV, initiate transfer from', from)
+  } else {
+    return;
+  }
+
   let term = `new
   basket,
   rl(\`rho:registry:lookup\`),
@@ -61,11 +70,14 @@ for (@(_, RevVault) <- RevVaultCh) {
     try {
       dataAtNameResponse = await rchainToolkit.http.easyDeploy(
           process.env.VALIDATOR_HOST,
-          term,
-          privateKey,
-          1,
-          10000000,
-          10 * 60 * 1000
+          {
+            privateKey: privateKey,
+            shardId: process.env.SHARD_ID,
+            term: term,
+            phloPrice: 1,
+            phloLimit: 10000000,
+            timeout: 3 * 60 * 1000
+          }
       );
     } catch (err) {
       console.log(err);

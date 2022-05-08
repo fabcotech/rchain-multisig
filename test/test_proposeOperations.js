@@ -1,5 +1,5 @@
 const { proposeOperationsTerm } = require('../src/');
-const rc = require('rchain-toolkit');
+const rc = require('@fabcotech/rchain-toolkit');
 
 module.exports.main = async (
   multisigRegistryUri,
@@ -15,11 +15,14 @@ module.exports.main = async (
   try {
     dataAtNameResponse = await rc.http.easyDeploy(
       process.env.VALIDATOR_HOST,
-      term,
-      privateKey,
-      1,
-      1000000000,
-      40000
+      {
+        privateKey: privateKey,
+        shardId: process.env.SHARD_ID,
+        term: term,
+        phloPrice: 1,
+        phloLimit: 10000000,
+        timeout: 3 * 60 * 1000
+      }
     );
   } catch (err) {
     console.log(err);
