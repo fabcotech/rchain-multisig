@@ -1,0 +1,16 @@
+{
+  "name": "dapp-multisig",
+  "version": "1.1.0",
+  "description": "Dappy dapp for multisig management",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "webpack --mode development --watch",
+    "build": "webpack --mode production",
+    "dappy:pushdapp": "dappy-cli pushdapp",
+    "dappy:pushzones": "dappy-cli pushzones"
+  },
+  "author": "FABCO",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

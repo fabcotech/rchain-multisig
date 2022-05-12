@@ -50,7 +50,7 @@ const main = async () => {
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ First application validated, received its OCAP key')
 
-  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
+  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1);
   console.log('✓ channel updated');
 
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
@@ -66,7 +66,7 @@ const main = async () => {
     { "type": "ACCEPT", "applicationId": APPLICATION_ID3 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID4 }
   ];
-  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted);
+  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted, APPLICATION_ID1);
 
   await checkLastOperations(multisigRegistryUri, {
     "0": "application id not found",
@@ -96,7 +96,7 @@ const main = async () => {
   console.log('✓ Checked balances')
 
   // 25%
-  const proposalTransfer1 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS1);
+  const proposalTransfer1 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS1, APPLICATION_ID1);
   console.log(proposalTransfer1)
   if (proposalTransfer1.message !== "operations recorded, did not execute") {
     throw new Error('proposal 1, expected "operations recorded, did not execute"')
@@ -106,7 +106,7 @@ const main = async () => {
   await checkMultisigBalance(multisigRegistryUri, 3000);
 
   // 50%
-  const proposalTransfer2 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS1);
+  const proposalTransfer2 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS1, APPLICATION_ID2);
   console.log(proposalTransfer2)
   if (proposalTransfer2.message !== "operations recorded, did not execute") {
     throw new Error('proposal 2, expected "operations recorded, did not execute"')
@@ -116,7 +116,7 @@ const main = async () => {
   await checkMultisigBalance(multisigRegistryUri, 3000);
 
   // 25%
-  const proposalTransfer3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS2);
+  const proposalTransfer3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS2, APPLICATION_ID3);
   console.log(proposalTransfer3)
   if (proposalTransfer3.message !== "operations recorded, did not execute") {
     throw new Error('proposal 3, expected "operations recorded, did not execute"')
@@ -126,7 +126,7 @@ const main = async () => {
   await checkMultisigBalance(multisigRegistryUri, 3000);
 
   // 75%
-  const proposalTransfer4 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1);
+  const proposalTransfer4 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1, APPLICATION_ID4);
   console.log(proposalTransfer4)
   if (proposalTransfer4.message !== "operations recorded, did execute") {
     throw new Error('proposal 4, expected "operations recorded, did execute"')
@@ -143,7 +143,7 @@ const main = async () => {
   })
 
   // 25%
-  const proposalTransferAgain = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1);
+  const proposalTransferAgain = await proposeOperations(multisigRegistryUri, PRIVATE_KEY4, OPERATIONS1, APPLICATION_ID4);
   console.log(proposalTransferAgain)
   if (proposalTransferAgain.message !== "operations recorded, did not execute") {
     throw new Error('proposal (agains), expected "operations recorded, did not execute"')

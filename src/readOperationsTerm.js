@@ -3,17 +3,17 @@ module.exports.readOperationsTerm = (
   payload
 ) => {
   return `new basket,
-  masterEntryCh, 
+  entryCh, 
   resultCh,
   stdout(\`rho:io:stdout\`),
   deployerId(\`rho:rchain:deployerId\`),
   registryLookup(\`rho:registry:lookup\`)
 in {
 
-  registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *masterEntryCh) |
+  registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *entryCh) |
 
-  for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ_OPERATIONS", "${payload.memberId}", *basket)) 
+  for (entry <= entryCh) {
+    entry!(("PUBLIC_READ_OPERATIONS", *basket)) 
   }
 }
 `;

@@ -15,7 +15,7 @@ in {
     // application accepted
     for (@key <- applicationCh) {
       stdout!("application was accepted") |
-      @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI")!(key)
+      @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI", "APPLICATION_ID")!(key)
     } |
 
     // application recorded

@@ -9,7 +9,7 @@ module.exports.proposeOperationsTerm = (
   registryLookup(\`rho:registry:lookup\`)
 in {
 
-  for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")) {
+  for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}", "${payload.memberId}")) {
     keyCh!(("PROPOSE_OPERATIONS", ${JSON.stringify(payload.operations).replace(new RegExp(': null|:null', 'g'), ': Nil').replace(/"\$BQ/g, '`').replace(/\$BQ"/g, '`')}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!(results) |

@@ -1,0 +1,175 @@
+body,
+html {
+  padding: 0px;
+  margin: 0px;
+  height: 100vh;
+  width: 100vw;
+  overflow: auto;
+}
+
+#root {
+  padding: 1rem;
+}
+
+.text-danger {
+  color: #bd1047;
+}
+.fc {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.label {
+  width: 120px;
+}
+
+input.input {
+  padding: 1rem;
+  height: 3em;
+  font-size: 1.25rem;
+  width: 600px;
+}
+
+button.is-normal {
+  font-size: 1.25rem !important;
+  height: 4rem !important;
+  padding: 1rem 3rem;
+  font-weight: 400;
+  border: 1px solid #84c4d3;
+  background: linear-gradient(45deg, #84c4d3, #cfffff);
+}
+
+button.is-normal:not(.disabled):hover {
+  border: 1px solid #84c4d3;
+  background: linear-gradient(45deg, #5e8f9a, #91eaea);
+}
+
+.members {
+  padding-top: 1rem;
+  border-top: 1px solid #aaa;
+}
+
+.member {
+  display: inline-block;
+  padding: 0.5rem;
+}
+
+.applications {
+  padding-top: 1rem;
+}
+
+.application {
+  display: inline-block;
+  padding: 0.5rem;
+}
+
+.multisig {
+  border: 1px solid #aaa;
+  padding: 1rem;
+  padding-top: 1.5rem;
+    position: relative;
+  margin-top: 1rem;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: 100%;
+}
+.reload {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.multisig>div {
+  padding-bottom: 1rem;
+}
+
+.operations>div {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.operations>div>.tag {
+  margin-bottom: 0.5rem;
+}
+
+.remove-operation {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+.tabs li.is-active a {
+  border-bottom-color: #4dc5c5;
+  color: #4dc5c5;
+}
+
+.tag-rounded {
+  margin-left: 0.5rem;
+  border-radius: 13px;
+  background: linear-gradient(45deg, #35626c, #4dc5c5);
+}
+
+.title {
+  font-weight: 500;
+}
+
+.is-5 {
+  margin: 0px !important;
+  margin-bottom: 0px !important;
+}
+
+.is-2 {
+  font-size: 1.1rem !important;
+  display: inline;
+}
+
+.rev-address {
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.proposed-operations {
+  display: flex;
+  flex-wrap: wrap;
+}
+.proposed-operation {
+  overflow: auto;
+  position: relative;
+  display: grid;
+    display: grid;
+    grid-template-rows: 1fr 4fr 1fr;
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+  margin-top: 1rem;
+  width: 450px;
+    min-height: 300px;
+  background: rgb(12, 23, 220);
+  color: #fff;
+  padding: 1rem;
+  background: linear-gradient(45deg, #194c70, #63aeef);
+}
+
+.proposed-operation p.pmembers {
+  font-size: 1.2rem;
+  white-space: pre-line;
+  word-break: break-all;
+  min-height: 80px;
+}
+
+.proposed-operation .is-5 {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.proposed-operation p.percent {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 2rem;
+  font-weight: 600 !important;
+}
+
+.proposed-operation button {
+  margin-top: 1rem;
+}

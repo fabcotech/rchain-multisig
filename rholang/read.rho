@@ -1,12 +1,12 @@
 new basket,
-  masterEntryCh, 
+  entryCh, 
   resultCh,
   registryLookup(`rho:registry:lookup`)
 in {
 
-  registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
+  registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *entryCh) |
 
-  for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ", *basket))
+  for (entry <= entryCh) {
+    entry!(("PUBLIC_READ", *basket))
   }
 }

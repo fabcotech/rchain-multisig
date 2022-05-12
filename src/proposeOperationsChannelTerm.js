@@ -158,7 +158,7 @@ in {
     }
   } |
 
-  for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")) {
+  for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}", "${payload.memberId}")) {
     keyCh!(("PROPOSE_OPERATIONS", bundle+{*newExecuteCh}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       match results {

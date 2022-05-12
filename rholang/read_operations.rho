@@ -1,14 +1,14 @@
 new basket,
-  masterEntryCh, 
+  entryCh, 
   resultCh,
   stdout(`rho:io:stdout`),
   deployerId(`rho:rchain:deployerId`),
   registryLookup(`rho:registry:lookup`)
 in {
 
-  registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *masterEntryCh) |
+  registryLookup!(`rho:id:MULTISIG_REGISTRY_URI`, *entryCh) |
 
-  for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ_OPERATIONS", "MEMBER_ID", *basket)) 
+  for (entry <= entryCh) {
+    entry!(("PUBLIC_READ_OPERATIONS", *basket)) 
   }
 }

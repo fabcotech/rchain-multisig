@@ -3,15 +3,15 @@ module.exports.readTerm = (
   payload
 ) => {
   return `new basket,
-  masterEntryCh, 
+  entryCh, 
   resultCh,
   registryLookup(\`rho:registry:lookup\`)
 in {
 
-  registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *masterEntryCh) |
+  registryLookup!(\`rho:id:${payload.multisigRegistryUri}\`, *entryCh) |
 
-  for (masterEntry <= masterEntryCh) {
-    masterEntry!(("PUBLIC_READ", *basket))
+  for (entry <= entryCh) {
+    entry!(("PUBLIC_READ", *basket))
   }
 }
 `;

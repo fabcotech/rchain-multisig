@@ -4,9 +4,11 @@ const rc = require('@fabcotech/rchain-toolkit');
 module.exports.main = async (
   multisigRegistryUri,
   privateKey,
+  memberId,
 ) => {
   const term = proposeOperationsChannelTerm({
     multisigRegistryUri: multisigRegistryUri,
+    memberId: memberId,
   });
 
   let dataAtNameResponse;

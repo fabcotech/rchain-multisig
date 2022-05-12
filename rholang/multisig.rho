@@ -79,9 +79,37 @@ in {
       } |
       executeChannelCh!(*defaultExecuteChannelCh) |
 
-      for (@("PUBLIC_READ_OPERATIONS", memberId, return) <= entryCh) {
-        for (@op <<- @(*self, "operations", memberId)) {
-          @return!(op)
+      for (@("PUBLIC_READ_OPERATIONS", return) <= entryCh) {
+        for (@memberIds <<- @(*self, "members")) {
+          match memberIds {
+            Set() => { @return!({}) }
+            _ => {
+              new itCh, operationsCh in {
+                operationsCh!({}) |
+                itCh!(memberIds) |
+                for (@ids <= itCh) {
+                  match ids {
+                    Set() => {}
+                    Set(last) => {
+                      for (@ops <- operationsCh) {
+                        for (@op <<- @(*self, "operations", last)) {
+                          @return!(ops.set(last, op))
+                        }
+                      }
+                    }
+                    Set(first...rest) => {
+                      for (@ops <- operationsCh) {
+                        for (@op <<- @(*self, "operations", first)) {
+                          operationsCh!(ops.set(first, op)) |
+                          itCh!(rest)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       } |
 

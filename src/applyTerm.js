@@ -19,7 +19,7 @@ in {
     // application accepted
     for (@key <- applicationCh) {
       stdout!("application was accepted") |
-      @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}")!(key)
+      @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}", "${payload.applicationId}")!(key)
     } |
 
     // application recorded

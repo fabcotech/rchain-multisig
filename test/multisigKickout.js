@@ -46,7 +46,7 @@ const main = async () => {
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ First application validated, received its OCAP key')
 
-  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
+  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1);
   console.log('✓ channel updated');
 
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
@@ -59,7 +59,7 @@ const main = async () => {
     { "type": "ACCEPT", "applicationId": APPLICATION_ID3 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID4 }
   ];
-  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted);
+  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted, APPLICATION_ID1);
   console.log('✓ channel updated');
 
   await checkLastOperations(multisigRegistryUri, {
@@ -77,7 +77,7 @@ const main = async () => {
   ];
 
   // 25%
-  const proposalkick1 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS3);
+  const proposalkick1 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS3, APPLICATION_ID1);
   console.log(proposalkick1)
   if (proposalkick1.message !== "operations recorded, did not execute") {
     throw new Error('proposal kickout 1, expected "operations recorded, did not execute"')
@@ -85,7 +85,7 @@ const main = async () => {
   console.log('✓ Proposal kickout 1')
 
   // 50%
-  const proposalkick2 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS3);
+  const proposalkick2 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS3, APPLICATION_ID2);
   console.log(proposalkick2)
   if (proposalkick2.message !== "operations recorded, did not execute") {
     throw new Error('proposal kickout 2, expected "operations recorded, did not execute"')
@@ -93,7 +93,7 @@ const main = async () => {
   console.log('✓ Proposal kickout 2')
 
   // 75%
-  const proposalkick3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS3);
+  const proposalkick3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS3, APPLICATION_ID3);
 
   if (proposalkick3.message !== "operations recorded, did execute") {
     throw new Error('proposal kickout 4, expected "operations recorded, did execute"')

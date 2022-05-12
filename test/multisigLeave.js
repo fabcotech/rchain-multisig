@@ -43,13 +43,13 @@ const main = async () => {
     { "type": "ACCEPT", "applicationId": "doesnotexist" },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID2 },
   ];
-  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted);
+  const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted, APPLICATION_ID1);
 
   console.log('operationsShouldBeAcceptedResult', operationsShouldBeAcceptedResult);
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2])
   console.log('✓ User 2 has joined the multisig');
 
-  await leave(multisigRegistryUri, PRIVATE_KEY2);
+  await leave(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2);
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ User 2 left the multisig');
 
@@ -57,7 +57,7 @@ const main = async () => {
     { "type": "ACCEPT", "applicationId": "doesnotexist" }
   ];
 
-  proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS_GOING_NOWHERE)
+  proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS_GOING_NOWHERE, APPLICATION_ID2)
     .then(() => {
       throw new Error('Operations should have gone nowhere')
     })

@@ -3,11 +3,13 @@ const rc = require('@fabcotech/rchain-toolkit');
 
 module.exports.main = async (
   multisigRegistryUri,
-  privateKey
+  privateKey,
+  memberId
 ) => {
 
   const term = leaveTerm({
-    multisigRegistryUri: multisigRegistryUri
+    multisigRegistryUri: multisigRegistryUri,
+    memberId: memberId,
   });
 
   let dataAtNameResponse;
