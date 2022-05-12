@@ -23,7 +23,7 @@ export const MultisigComponent = (props) => {
   {' '}
   { props.as && <span className="title-as">as {props.as}</span> }
   <div className="multisig">
-    <button className="reload button" type="button" onClick={() => props.reload({})}>Reload</button>
+    <button disabled={props.reloading} className="reload button" type="button" onClick={() => props.reload({})}>{props.reloading ? 'Reloading' : 'Reload'}</button>
     <div className="main">
       {<div className="tabs">
         <ul>
@@ -86,6 +86,7 @@ export const MultisigComponent = (props) => {
       {
         tab === 'operations' &&
         <OperationsComponent
+          as={props.as}
           operations={props.operations}
           removeOperation={props.removeOperation}
           proposeOperations={props.proposeOperations}
@@ -150,6 +151,7 @@ export const MultisigComponent = (props) => {
     {
       tab === 'proposed' &&
       <ProposedOperationsComponent
+        as={props.as}
         addOperations={props.addOperations}
         members={props.config.members}
         proposedOperations={props.proposedOperations}

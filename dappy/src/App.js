@@ -2,12 +2,14 @@ import React, { Fragment } from 'react';
 import { readTerm } from '../../src/readTerm';
 import { readOperationsTerm } from '../../src/readOperationsTerm';
 import { proposeOperationsTerm } from '../../src/proposeOperationsTerm';
+import { mintAndApplyAndProposeTerm } from '../../src/mintAndApplyAndProposeTerm';
 import { applyTerm } from '../../src/applyTerm';
 
 import { LoadComponent } from './Load'
 import { MultisigComponent } from './Multisig'
 
 const SUPPORTED_VERSION = "0.1.0";
+const MULTISIG_MINT_REGISTRY_URI = "moi1x4ugjhufdyqhqebsg7bxpdq54f7wn84kkry9p1435788yr8ejt";
 
 export const hashCode = function(s) {
   var hash = 0, i, chr, len;
@@ -43,17 +45,44 @@ const orderAndUniqueOperations = (operations, operation) => {
 export class AppComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.dappyRChain = new DappyRChain();
+    window.dappyRChain = new DappyRChain();
     this.rchainWeb = new RChainWeb.http({
       readOnlyHost: "dappynetwork://",
       validatorHost: "dappynetwork://",
     })
     this.state = {
       loadError: '',
+      loading: false,
+      reloading: false,
       operations: [],
       proposedOperations: {},
       config: undefined,
     }
+  }
+
+  deploy = ({ as }) => {
+    this.setState({
+      deploying: true,
+    });
+    const term = mintAndApplyAndProposeTerm({
+      mintMultisigRegistryUri: MULTISIG_MINT_REGISTRY_URI,
+      applicationId: as,
+      memberId: as
+    });
+    window.dappyRChain
+      .sendTransaction({
+        term: term,
+        signatures: {},
+      })
+      .then((a) => {
+        console.log(a);
+        this.setState({
+          operations: [],
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   load = ({ uri, as }) => {
@@ -81,7 +110,9 @@ export class AppComponent extends React.Component {
               proposedOperations: data2,
               // if it is a reload, do not reset operations
               operations: uri ? [] : this.state.operations,
-              loadError: ''
+              loadError: '',
+              loading: false,
+              reloading: false,
             });
           } else {
             const e = 'Unsupported version, current : ' + data.version + ', exepected : ' + SUPPORTED_VERSION
@@ -90,13 +121,17 @@ export class AppComponent extends React.Component {
               multisigRegistryUri: undefined,
               operations: [],
               config: undefined,
-              loadError: e
+              loadError: e,
+              loading: false,
+              reloading: false,
             }) 
           }
         } else {
           console.error('Could not load multisig');
           this.setState({
-            loadError: 'Could not load multisig'
+            loadError: 'Could not load multisig',
+            loading: false,
+            reloading: false,
           })
         }
       })
@@ -113,7 +148,12 @@ export class AppComponent extends React.Component {
       return (
         <MultisigComponent
           as={this.state.as}
-          reload={this.load}
+          reloading={this.state.reloading}
+          loading={this.state.loading}
+          reload={(a) => {
+            this.setState({ reloading: true });
+            this.load(a);
+          }}
           multisigRegistryUri={this.state.multisigRegistryUri}
           proposedOperations={this.state.proposedOperations}
           operations={this.state.operations}
@@ -142,7 +182,7 @@ export class AppComponent extends React.Component {
             this.setState({
               operations: [],
             });
-            this.dappyRChain
+            window.dappyRChain
               .sendTransaction({
                 term: proposeOperationsTerm({
                   multisigRegistryUri: this.state.multisigRegistryUri,
@@ -159,7 +199,7 @@ export class AppComponent extends React.Component {
               });
           }}
           apply={(a) => {
-            this.dappyRChain
+            window.dappyRChain
               .sendTransaction({
                 term: applyTerm({
                   multisigRegistryUri: this.state.multisigRegistryUri,
@@ -179,7 +219,15 @@ export class AppComponent extends React.Component {
       <div>
         <LoadComponent
           loadError={this.state.loadError}
-          load={this.load}
+          load={(a) => {
+            this.setState({
+              loading: true,
+            });
+            this.load(a);
+          }}
+          deploy={this.deploy}
+          deploying={this.state.deploying}
+          loading={this.state.loading}
         />
       </div>
     );

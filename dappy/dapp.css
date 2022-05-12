@@ -40,7 +40,7 @@ button.is-normal {
   background: linear-gradient(45deg, #84c4d3, #cfffff);
 }
 
-button.is-normal:not(.disabled):hover {
+button.is-normal:not(.disabled):not([disabled]):hover {
   border: 1px solid #84c4d3;
   background: linear-gradient(45deg, #5e8f9a, #91eaea);
 }

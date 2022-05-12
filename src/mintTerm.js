@@ -4,6 +4,7 @@ module.exports.mintTerm = (
 ) => {
   return `new basket,
   mintEntryCh,
+  returnCh,
   stdout(\`rho:io:stdout\`),
   registryLookup(\`rho:registry:lookup\`)
 in {
@@ -11,7 +12,12 @@ in {
   registryLookup!(\`rho:id:${payload.mintMultisigRegistryUri}\`, *mintEntryCh) |
 
   for (mint <- mintEntryCh) {
-    mint!(*basket)
+    mint!(*returnCh) |
+    for (@r <- returnCh) {
+      // OP_MINT_COMPLETED_BEGIN
+      basket!(r)
+      // OP_MINT_COMPLETED_END
+    }
   }
 }
 `;

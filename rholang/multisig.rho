@@ -75,7 +75,7 @@ in {
       @(*self, "multisigMembershipsKeys")!({}) |
 
       for (_ <= defaultExecuteChannelCh) {
-        stdout!("don't know how to execute")
+        stdout!("default execution channel, don't know how to execute operations")
       } |
       executeChannelCh!(*defaultExecuteChannelCh) |
 
@@ -270,6 +270,9 @@ in {
                       stdout!(op.toByteArray()) |
                       match operations.toByteArray() == op.toByteArray() {
                         true => {
+                          stdout!("yes true") |
+                          stdout!(("howMany2 * 100", howMany2 * 100)) |
+                          stdout!(("howMany2 * 100 / members.size()", howMany2 * 100 / members.size())) |
                           for (@howMany <- howManyCh) {
                           stdout!((true, howMany.size())) |
                             match howMany.size() + 1 {

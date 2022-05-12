@@ -16,6 +16,8 @@ in {
     for (@key <- applicationCh) {
       stdout!("application was accepted") |
       @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI", "APPLICATION_ID")!(key)
+      // OP_APPLY_COMPLETED_BEGIN
+      // OP_APPLY_COMPLETED_END
     } |
 
     // application recorded

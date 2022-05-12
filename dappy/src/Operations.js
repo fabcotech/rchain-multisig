@@ -33,7 +33,12 @@ export const OperationsComponent = (props) => {
       }
       {
         props.operations.length && !!props.proposeOperations ?
-        <button type="button" className="button is-normal" onClick={() => props.proposeOperations(undefined)}>
+        <button
+          type="button"
+          disabled={!props.as}
+          className="button is-normal"
+          onClick={() => props.proposeOperations(undefined)}
+        >
           Propose
           { props.operations.length === 1 ? ' 1 operation' : ` ${props.operations.length} operations`}
         </button> : undefined
@@ -43,10 +48,19 @@ export const OperationsComponent = (props) => {
         <>
           <br />
           <br />
-          <button type="button" className="button is-normal" onClick={() => props.proposeOperations('null')}>
+          <button
+            type="button"
+            disabled={!props.as}
+            className="button is-normal"
+            onClick={() => props.proposeOperations('null')}
+          >
             Cancel current proposal ({props.proposedOperations.length} operation(s))
           </button> 
         </> : undefined
+      }
+      {
+        !!props.proposeOperations && !props.as ?
+        <p className="text-danger">You must connect as to propose or cancel oerations</p> : undefined
       }
     </div>
   )

@@ -1,0 +1,32 @@
+{
+  "options": {
+    "platform": "rchain",
+    "readOnly": "http://localhost:40403",
+    "validator": "http://localhost:40403",
+    "shardId": "dev",
+    "masterRegistryUri": "",
+    "boxId": "",
+    "nameSystemContractId": "",
+    "privateKey": "",
+    "contractId": "",
+    "purseId": ""
+  },
+  "zones": [
+    {
+      "origin": "multisig",
+      "ttl": 3600,
+      "records": [
+        {
+          "name": "@",
+          "type": "TXT",
+          "data": "DAPP_ADDRESS=contract.purse"
+        }
+      ]
+    }
+  ],
+  "dapp": {
+    "html": "./dapp.html",
+    "js": "./dist/main.js",
+    "css": "./dapp.css"
+  }
+}
