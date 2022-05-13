@@ -14,8 +14,10 @@ module.exports.mintAndApplyAndProposeTerm = (
     `// OP_MINT_COMPLETED_END`,
     `${applyTerm(payload)
         .replace('deployId(\`rho:rchain:deployId\`),', '')
-        .replace('`rho:id:undefined`', 'r.get("registryUri")')
-        .replace('"undefined"', 'r.get("registryUri")')
+        .replace('`rho:id:undefined`', 'rmint.get("registryUri")')
+        // we cannot predict registry URI
+        // we need to do this
+        .replace(`rho:id:undefined`, `rmint.get("registryUri")`)
       }`
   );
 
@@ -23,10 +25,10 @@ module.exports.mintAndApplyAndProposeTerm = (
   const indexEnd2 = term2.indexOf('// OP_APPLY_COMPLETED_END');
   const term3 = term2.slice(0, indexStart2) + term2.slice(indexEnd2).replace(
     `// OP_APPLY_COMPLETED_END`,
-    `| ${proposeOperationsChannelTerm(payload)
+    `${proposeOperationsChannelTerm(payload)
         .replace('deployId(\`rho:rchain:deployId\`),', '')
-        .replace('"undefined"', 'r.get("registryUri")')
-      }`
+        .replace(`rho:id:undefined`, `rmint.get("registryUri")`)
+      } |`
   );
 
   return term3;

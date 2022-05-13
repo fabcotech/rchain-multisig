@@ -46,6 +46,15 @@ export class AppComponent extends React.Component {
   constructor(props) {
     super(props);
     window.dappyRChain = new DappyRChain();
+    window.dappyRChain.addEventListenner((e) => {
+      console.log(e)
+      if (e.val.registryUri) {
+        this.setState({
+          deployedMultisigs: this.state.deployedMultisigs.concat(e.val.registryUri.replace('rho:id:', '')),
+          deploying: false,
+        })
+      }
+    })
     this.rchainWeb = new RChainWeb.http({
       readOnlyHost: "dappynetwork://",
       validatorHost: "dappynetwork://",
@@ -55,6 +64,7 @@ export class AppComponent extends React.Component {
       loading: false,
       reloading: false,
       operations: [],
+      deployedMultisigs: [],
       proposedOperations: {},
       config: undefined,
     }
@@ -76,9 +86,6 @@ export class AppComponent extends React.Component {
       })
       .then((a) => {
         console.log(a);
-        this.setState({
-          operations: [],
-        });
       })
       .catch((err) => {
         console.log(err);
@@ -138,7 +145,9 @@ export class AppComponent extends React.Component {
       .catch(err => {
         console.error(err);
         this.setState({
-          loadError: 'Could not find multisig'
+          loadError: 'Could not find multisig',
+          loading: false,
+          reloading: false,
         })
       })
   }
@@ -225,6 +234,7 @@ export class AppComponent extends React.Component {
             });
             this.load(a);
           }}
+          deployedMultisigs={this.state.deployedMultisigs}
           deploy={this.deploy}
           deploying={this.state.deploying}
           loading={this.state.loading}

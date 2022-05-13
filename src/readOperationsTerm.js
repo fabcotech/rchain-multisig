@@ -4,9 +4,6 @@ module.exports.readOperationsTerm = (
 ) => {
   return `new basket,
   entryCh, 
-  resultCh,
-  stdout(\`rho:io:stdout\`),
-  deployerId(\`rho:rchain:deployerId\`),
   registryLookup(\`rho:registry:lookup\`)
 in {
 

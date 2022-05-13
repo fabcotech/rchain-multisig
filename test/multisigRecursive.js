@@ -43,13 +43,13 @@ const main = async () => {
   const result4 = await mint(PRIVATE_KEY1, mintRegistryUri);
   const multisigRegistryUri3 = result4.registryUri.replace('rho:id:', '');
   await apply(multisigRegistryUri3, PRIVATE_KEY2, APPLICATION_ID2);
-  await proposeOperationsChannel(multisigRegistryUri3, PRIVATE_KEY2);
+  await proposeOperationsChannel(multisigRegistryUri3, PRIVATE_KEY2, APPLICATION_ID2);
 
   await apply(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1)
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ First application validated, received its OCAP key')
 
-  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
+  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1);
   console.log('✓ channel updated');
 
   /*
@@ -59,7 +59,7 @@ const main = async () => {
   const operationsShouldBeAccepted = [
     { "type": "MINT_MULTISIG", "applicationId": "bob", "mintRegistryUri": `$BQrho:id:${mintRegistryUri}$BQ` },
   ];
-  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted);
+  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted, APPLICATION_ID1);
 
   const term = readTerm({ multisigRegistryUri: multisigRegistryUri });
   const resultConfig1 = await rc.http.exploreDeploy(
@@ -89,7 +89,7 @@ const main = async () => {
   const operationsShouldBeAccepted2 = [
     { "type": "JOIN_MULTISIG", "applicationId": "dan", "registryUri": `$BQrho:id:${multisigRegistryUri2}$BQ` },
   ];
-  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted2);
+  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted2, APPLICATION_ID1);
 
   const resultConfig2 = await rc.http.exploreDeploy(
     process.env.READ_ONLY_HOST,
@@ -119,7 +119,7 @@ const main = async () => {
   const operationsShouldBeAccepted3 = [
     { "type": "JOIN_MULTISIG", "applicationId": "kim", "registryUri": `$BQrho:id:${multisigRegistryUri3}$BQ` },
   ];
-  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted3);
+  await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted3, APPLICATION_ID1);
 
   const resultConfig3 = await rc.http.exploreDeploy(
     process.env.READ_ONLY_HOST,
@@ -143,7 +143,7 @@ const main = async () => {
   const operationsShouldBeAccepted1 = [
     { "type": "ACCEPT", "applicationId": "kim" },
   ];
-  await proposeOperations(multisigRegistryUri3, PRIVATE_KEY2, operationsShouldBeAccepted1);
+  await proposeOperations(multisigRegistryUri3, PRIVATE_KEY2, operationsShouldBeAccepted1, APPLICATION_ID2);
 
   const resultConfig4 = await rc.http.exploreDeploy(
     process.env.READ_ONLY_HOST,

@@ -19,9 +19,7 @@ in {
     // application accepted
     for (@key <- applicationCh) {
       stdout!("application was accepted") |
-      @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}", "${payload.applicationId}")!(key)
-      // OP_APPLY_COMPLETED_BEGIN
-      // OP_APPLY_COMPLETED_END
+      @(*deployerId, "rchain-multisig", \`rho:id:${payload.multisigRegistryUri}\`, "${payload.applicationId}")!(key)
     } |
 
     // application recorded
@@ -32,7 +30,9 @@ in {
           stdout!(("failed", r))
         }
         (true, p) => {
+          // OP_APPLY_COMPLETED_BEGIN
           deployId!({ "status": "completed", "message": p }) |
+          // OP_APPLY_COMPLETED_END
           stdout!(p)
         }
       }

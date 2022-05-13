@@ -5,7 +5,7 @@ new deployId(`rho:rchain:deployId`),
   registryLookup(`rho:registry:lookup`)
 in {
 
-  for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI", "MEMBER_ID")) {
+  for (keyCh <<- @(*deployerId, "rchain-multisig", `rho:id:MULTISIG_REGISTRY_URI`, "MEMBER_ID")) {
     keyCh!(("LEAVE", Nil, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!(results) |

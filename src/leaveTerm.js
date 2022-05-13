@@ -9,7 +9,7 @@ module.exports.leaveTerm = (
   registryLookup(\`rho:registry:lookup\`)
 in {
 
-  for (keyCh <<- @(*deployerId, "rchain-multisig", "${payload.multisigRegistryUri}", "${payload.memberId}")) {
+  for (keyCh <<- @(*deployerId, "rchain-multisig", \`rho:id:${payload.multisigRegistryUri}\`, "${payload.memberId}")) {
     keyCh!(("LEAVE", Nil, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       stdout!(results) |

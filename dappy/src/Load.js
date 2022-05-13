@@ -54,12 +54,26 @@ export const LoadComponent = (props) => {
       as2 && as2.length ?
         <button disabled={props.deploying} className="button is-normal" onClick={() => props.deploy({
           as: as2,
-        })}>{props.loading ? 'Deploying new multisig' : 'Deploy new multisig'}</button> :
+        })}>{props.deploying ? 'Deploying new multisig' : 'Deploy new multisig'}</button> :
         <button className="button is-normal disabled" disabled={true}>Deploy new  multisig</button>
     }
     {
       props.loadError &&
       <p className="text-danger">{props.deployError}</p>
+    }
+    <br />
+    {
+      props.deployedMultisigs.map(dm => {
+        return (
+        <div>
+          <span>{dm}</span>
+          {' '}
+          <a onClick={(e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText(dm)
+          }}>copy</a>
+        </div>);
+      })
     }
   </>;
 }

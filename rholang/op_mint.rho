@@ -9,9 +9,9 @@ in {
 
   for (mint <- mintEntryCh) {
     mint!(*returnCh) |
-    for (@r <- returnCh) {
+    for (@rmint <- returnCh) {
       // OP_MINT_COMPLETED_BEGIN
-      deployId!(r)
+      deployId!(rmint)
       // OP_MINT_COMPLETED_END
     }
   }

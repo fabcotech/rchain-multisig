@@ -154,7 +154,7 @@ in {
     }
   } |
 
-  for (keyCh <<- @(*deployerId, "rchain-multisig", "MULTISIG_REGISTRY_URI", "MEMBER_ID")) {
+  for (keyCh <<- @(*deployerId, "rchain-multisig", `rho:id:MULTISIG_REGISTRY_URI`, "MEMBER_ID")) {
     keyCh!(("PROPOSE_OPERATIONS", bundle+{*newExecuteCh}, bundle+{*returnCh})) |
     for (@results <- returnCh) {
       match results {
@@ -165,7 +165,9 @@ in {
           deployId!({ "status": "completed" })
         }
         (true, String) => {
+          // OP_PROPOSE_OPERATIONS_CHANNEL_COMPLETED_BEGIN
           deployId!({ "status": "completed", "message": results.nth(1) })
+          // OP_PROPOSE_OPERATIONS_CHANNEL_COMPLETED_END
         }
       }
     }
