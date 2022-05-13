@@ -2,7 +2,7 @@
 module.exports.mintTerm = (
   payload
 ) => {
-  return `new basket,
+  return `new deployId(\`rho:rchain:deployId\`),
   mintEntryCh,
   returnCh,
   stdout(\`rho:io:stdout\`),
@@ -15,7 +15,7 @@ in {
     mint!(*returnCh) |
     for (@r <- returnCh) {
       // OP_MINT_COMPLETED_BEGIN
-      basket!(r)
+      deployId!(r)
       // OP_MINT_COMPLETED_END
     }
   }

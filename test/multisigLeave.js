@@ -34,7 +34,7 @@ const main = async () => {
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ First application validated, received its OCAP key')
 
-  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1);
+  const proposalAcceptChannel = await proposeOperationsChannel(multisigRegistryUri, PRIVATE_KEY1, APPLICATION_ID1);
   console.log('✓ channel updated');
 
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)

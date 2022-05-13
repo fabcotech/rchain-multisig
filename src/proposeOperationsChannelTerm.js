@@ -2,7 +2,7 @@
 module.exports.proposeOperationsChannelTerm = (
   payload
 ) => {
-  return `new basket,
+  return `new deployId(\`rho:rchain:deployId\`),
   newExecuteCh,
   returnCh,
   stdout(\`rho:io:stdout\`),
@@ -163,13 +163,13 @@ in {
     for (@results <- returnCh) {
       match results {
         String => {
-          basket!({ "status": "failed", "error": results })
+          deployId!({ "status": "failed", "error": results })
         }
         (true, Nil) => {
-          basket!({ "status": "completed" })
+          deployId!({ "status": "completed" })
         }
         (true, String) => {
-          basket!({ "status": "completed", "message": results.nth(1) })
+          deployId!({ "status": "completed", "message": results.nth(1) })
         }
       }
     }

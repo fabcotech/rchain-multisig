@@ -2,7 +2,7 @@
 module.exports.proposeOperationsTerm = (
   payload
 ) => {
-  return `new basket,
+  return `new deployId(\`rho:rchain:deployId\`),
   returnCh,
   stdout(\`rho:io:stdout\`),
   deployerId(\`rho:rchain:deployerId\`),
@@ -15,13 +15,13 @@ in {
       stdout!(results) |
       match results {
         String => {
-          basket!({ "status": "failed", "error": results })
+          deployId!({ "status": "failed", "error": results })
         }
         (true, Nil) => {
-          basket!({ "status": "completed" })
+          deployId!({ "status": "completed" })
         }
         (true, String) => {
-          basket!({ "status": "completed", "message": results.nth(1) })
+          deployId!({ "status": "completed", "message": results.nth(1) })
         }
       }
     }

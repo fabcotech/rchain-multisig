@@ -2,7 +2,7 @@
 module.exports.applyTerm = (
   payload
 ) => {
-  return `new basket,
+  return `new deployId(\`rho:rchain:deployId\`),
   masterEntryCh,
   applicationCh,
   resultCh,
@@ -28,11 +28,11 @@ in {
     for (@r <- resultCh) {
       match r {
         String => {
-          basket!({ "status": "failed", "message": r }) |
+          deployId!({ "status": "failed", "message": r }) |
           stdout!(("failed", r))
         }
         (true, p) => {
-          basket!({ "status": "completed", "message": p }) |
+          deployId!({ "status": "completed", "message": p }) |
           stdout!(p)
         }
       }

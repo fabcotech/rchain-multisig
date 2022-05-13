@@ -13,7 +13,7 @@ module.exports.mintAndApplyAndProposeTerm = (
   const term2 = term1.slice(0, indexStart) + term1.slice(indexEnd).replace(
     `// OP_MINT_COMPLETED_END`,
     `${applyTerm(payload)
-        .replace('basket,', '')
+        .replace('deployId(\`rho:rchain:deployId\`),', '')
         .replace('`rho:id:undefined`', 'r.get("registryUri")')
         .replace('"undefined"', 'r.get("registryUri")')
       }`
@@ -24,7 +24,7 @@ module.exports.mintAndApplyAndProposeTerm = (
   const term3 = term2.slice(0, indexStart2) + term2.slice(indexEnd2).replace(
     `// OP_APPLY_COMPLETED_END`,
     `| ${proposeOperationsChannelTerm(payload)
-        .replace('basket,', '')
+        .replace('deployId(\`rho:rchain:deployId\`),', '')
         .replace('"undefined"', 'r.get("registryUri")')
       }`
   );

@@ -11,7 +11,7 @@ module.exports.main = async (privateKey, from, to, amount) => {
   }
 
   let term = `new
-  basket,
+  deployId(\`rho:rchain:deployId\`),
   rl(\`rho:registry:lookup\`),
   RevVaultCh,
   stdout(\`rho:io:stdout\`)
@@ -43,11 +43,11 @@ for (@(_, RevVault) <- RevVaultCh) {
                   match result2 {
                     (true, Nil) => {
                       stdout!(("Finished transfer of " , amount , " dusts to " , to)) |
-                      basket!({ "status": "completed" })
+                      deployId!({ "status": "completed" })
                     }
                     _ => {
                       stdout!("Failed to transfer REV (vault transfer)") |
-                      basket!({ "status": "failed", "message": "Failed to transfer REV (vault transfer)" })
+                      deployId!({ "status": "failed", "message": "Failed to transfer REV (vault transfer)" })
                     }
                   }
                 }
@@ -55,7 +55,7 @@ for (@(_, RevVault) <- RevVaultCh) {
             }
             _ => {
               stdout!("Failed to transfer REV (vault not found)") |
-              basket!({ "status": "failed", "message": "Failed to transfer REV (vault not found)" })
+              deployId!({ "status": "failed", "message": "Failed to transfer REV (vault not found)" })
             }
           }
         }

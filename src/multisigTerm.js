@@ -1,7 +1,7 @@
 /* GENERATED CODE, only edit rholang/*.rho files*/
 module.exports.multisigTerm = (payload) => {
     return `new
-  basketMint,
+  deployId(\`rho:rchain:deployId\`),
   mintCh,
   mintUriCh,
   validateStringCh,
@@ -272,9 +272,6 @@ in {
                       stdout!(op.toByteArray()) |
                       match operations.toByteArray() == op.toByteArray() {
                         true => {
-                          stdout!("yes true") |
-                          stdout!(("howMany2 * 100", howMany2 * 100)) |
-                          stdout!(("howMany2 * 100 / members.size()", howMany2 * 100 / members.size())) |
                           for (@howMany <- howManyCh) {
                           stdout!((true, howMany.size())) |
                             match howMany.size() + 1 {
@@ -448,7 +445,7 @@ in {
   insertArbitrary!(bundle+{*mintCh}, *mintUriCh) |
   for (mintUri <- mintUriCh) {
     stdout!(("multisig mint registered at", *mintUri)) |
-    basketMint!({
+    deployId!({
       "status": "completed",
       "registryUri": *mintUri
     })
