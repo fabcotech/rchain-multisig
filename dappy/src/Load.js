@@ -1,15 +1,15 @@
 import React, { Fragment, useState } from 'react';
 
-const useInput = ({ type, className /*...*/ }) => {
-  const [value, setValue] = useState("");
-  const input = <input value={value} onChange={e => setValue(e.target.value)} type={type} className={className} />;
+const useInput = ({ defaultValue, type, className /*...*/ }) => {
+  const [value, setValue] = useState(defaultValue || "");
+  const input = <input defaultValue={defaultValue || ''} value={value} onChange={e => setValue(e.target.value)} type={type} className={className} />;
   return [value, input];
 }
 
 export const LoadComponent = (props) => {
-  const [uri, uriInput] = useInput({ type: "text", className: "input" });
-  const [as, asInput] = useInput({ type: "text", className: "input" });
-  const [as2, as2Input] = useInput({ type: "text", className: "input" });
+  const [uri, uriInput] = useInput({ defaultValue: props.defaultAddress, type: "text", className: "input" });
+  const [as, asInput] = useInput({ defaultValue: '', type: "text", className: "input" });
+  const [as2, as2Input] = useInput({ defaultValue: '', type: "text", className: "input" });
 
   return <>
     <div className="form">
@@ -62,6 +62,12 @@ export const LoadComponent = (props) => {
       <p className="text-danger">{props.deployError}</p>
     }
     <br />
+    <br />
+    {
+      props.deployedMultisigs.length ?
+        <h5 className="title is-5">Deployments :</h5>
+        : undefined
+    }
     {
       props.deployedMultisigs.map(dm => {
         return (

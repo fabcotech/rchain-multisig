@@ -186,6 +186,7 @@ export const MultisigComponent = (props) => {
               {' '}
               <button
                 type="button"
+                disabled
                 className="button is-small is-info"
                 onClick={(e) => {
                   e.preventDefault();

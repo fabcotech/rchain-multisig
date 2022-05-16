@@ -43,8 +43,16 @@ const orderAndUniqueOperations = (operations, operation) => {
   });
 }
 export class AppComponent extends React.Component {
+
   constructor(props) {
     super(props);
+    let defaultAddress = '';
+    const urlParams = new URLSearchParams(window.location.search);
+    const address = urlParams.get('address');
+    if (typeof address === 'string' && address.length === 54) {
+      defaultAddress = address;
+    }
+
     window.dappyRChain = new DappyRChain();
     window.dappyRChain.addEventListenner((e) => {
       console.log(e)
@@ -67,6 +75,7 @@ export class AppComponent extends React.Component {
       deployedMultisigs: [],
       proposedOperations: {},
       config: undefined,
+      defaultAddress: defaultAddress,
     }
   }
 
@@ -111,6 +120,7 @@ export class AppComponent extends React.Component {
 
           if (data.version === SUPPORTED_VERSION) {
             this.setState({
+              defaultAddress: '',
               as: as || this.state.as,
               multisigRegistryUri: uri || this.state.multisigRegistryUri,
               config: data,
@@ -227,6 +237,7 @@ export class AppComponent extends React.Component {
     return (
       <div>
         <LoadComponent
+          defaultAddress={this.state.defaultAddress}
           loadError={this.state.loadError}
           load={(a) => {
             this.setState({
