@@ -8,6 +8,10 @@ export const OperationsComponent = (props) => {
         <b>No pending operations</b> : undefined
       }
       {
+        !!props.proposeOperations && props.operations.length > 0 ?
+        <p>Those operations are pending. Carefully choose your operations, and submit by clicking the "Propose" button.<br/></p> : undefined
+      }
+      {
         props.operations.map((o, i) => {
           let c = 'is-info';
           if (o.type === 'KICKOUT') {
@@ -20,7 +24,7 @@ export const OperationsComponent = (props) => {
                 props.removeOperation(i)
               }
             } className="button remove-operation is-small">cancel</button> }
-            <span className={`tag ${c}`}>{o.type}</span>
+            Operation type : <span className={`tag ${c}`}>{o.type}</span>
             <pre>
               {
                 Object.keys(o).filter(k => k !== "type").map(k => {
@@ -59,8 +63,8 @@ export const OperationsComponent = (props) => {
         </> : undefined
       }
       {
-        !!props.proposeOperations && !props.as ?
-        <p className="text-danger">You must connect as to propose or cancel oerations</p> : undefined
+        props.operations.length > 0 && !!props.proposeOperations && !props.as ?
+        <p className="text-danger">You must log in to propose or cancel oerations (see top)</p> : undefined
       }
     </div>
   )

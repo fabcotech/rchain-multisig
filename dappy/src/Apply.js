@@ -11,11 +11,11 @@ export const ApplyComponent = (props) => {
 
   return <>
     <div className="form">
-      <div class="field is-horizontal">
-        <label class="label fc ">Apply as</label>
+      <div class="field">
+        <label class="label">Want to apply to the multisig ? Pick up a fun username !</label>
         <div class="control">
           {asInput}
-          <p class="help">Make sure member does not exist and use oly 0-9a-z characters</p>
+          <p class="help">Make sure member does not exist and use only 0-9a-z characters</p>
         </div>
       </div>
     </div>

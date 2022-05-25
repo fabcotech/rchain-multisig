@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { readTerm } from '../../src/readTerm';
 import { readOperationsTerm } from '../../src/readOperationsTerm';
 import { proposeOperationsTerm } from '../../src/proposeOperationsTerm';
@@ -9,7 +9,10 @@ import { LoadComponent } from './Load'
 import { MultisigComponent } from './Multisig'
 
 const SUPPORTED_VERSION = "0.1.0";
-const MULTISIG_MINT_REGISTRY_URI = "moi1x4ugjhufdyqhqebsg7bxpdq54f7wn84kkry9p1435788yr8ejt";
+// testnet
+const MULTISIG_MINT_REGISTRY_URI = "uht1khkk6sske1xmku91k6occcfpm4crqzyugj56jkt1xmdar9nr3t";
+// local
+//const MULTISIG_MINT_REGISTRY_URI = "dnx8tatikpj6onuc9tkoeido1z5t9ij1crzojdrc7n6pn9b93tc4dp";
 
 export const hashCode = function(s) {
   var hash = 0, i, chr, len;
@@ -75,7 +78,11 @@ export class AppComponent extends React.Component {
       deployedMultisigs: [],
       proposedOperations: {},
       config: undefined,
-      defaultAddress: defaultAddress,
+    }
+    if (defaultAddress) {
+      this.load({
+        uri: defaultAddress
+      })
     }
   }
 
@@ -95,9 +102,15 @@ export class AppComponent extends React.Component {
       })
       .then((a) => {
         console.log(a);
+        this.setState({
+          deploying: false,
+        });
       })
       .catch((err) => {
         console.log(err);
+        this.setState({
+          deploying: false,
+        });
       });
   }
 
@@ -120,7 +133,6 @@ export class AppComponent extends React.Component {
 
           if (data.version === SUPPORTED_VERSION) {
             this.setState({
-              defaultAddress: '',
               as: as || this.state.as,
               multisigRegistryUri: uri || this.state.multisigRegistryUri,
               config: data,
@@ -169,6 +181,20 @@ export class AppComponent extends React.Component {
           as={this.state.as}
           reloading={this.state.reloading}
           loading={this.state.loading}
+          setAs = {(as) => {
+            this.setState({ as })
+          }}
+          back={() => {
+            this.setState({
+              loadError: '',
+              loading: false,
+              reloading: false,
+              operations: [],
+              deployedMultisigs: [],
+              proposedOperations: {},
+              config: undefined,
+            });
+          }}
           reload={(a) => {
             this.setState({ reloading: true });
             this.load(a);
@@ -237,7 +263,6 @@ export class AppComponent extends React.Component {
     return (
       <div>
         <LoadComponent
-          defaultAddress={this.state.defaultAddress}
           loadError={this.state.loadError}
           load={(a) => {
             this.setState({

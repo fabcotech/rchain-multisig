@@ -272,10 +272,14 @@ in {
                       stdout!(op.toByteArray()) |
                       match operations.toByteArray() == op.toByteArray() {
                         true => {
+                          stdout!("Last member's operations do not match") |
                           for (@howMany <- howManyCh) {
-                          stdout!((true, howMany.size())) |
                             match howMany.size() + 1 {
                               howMany2 => {
+                                stdout!(("howMany2", howMany2)) |
+                                stdout!(("members.size()", members.size())) |
+                                stdout!(("percentage", percentage)) |
+                                stdout!(("consensus", howMany2 * 100 / members.size())) |
                                 match howMany2 * 100 / members.size() >= percentage {
                                   true => {
                                     executeOperationsCh!((operations, howMany.union(Set(last)))) |
@@ -290,13 +294,16 @@ in {
                           }
                         }
                         false => {
+                          stdout!("Last member's operations do match") |
                           for (@howMany <- howManyCh) {
-                          stdout!((false, howMany.size())) |
-                            // howMany
-                            // members
+                            stdout!(("howMany.size()", howMany.size())) |
+                            stdout!(("members.size()", members.size())) |
+                            stdout!(("percentage", percentage)) |
+                            stdout!(("consensus", howMany.size() * 100 / members.size())) |
                             match howMany.size() * 100 / members.size() >= percentage {
                               true => {
-                                executeOperationsCh!((operations, howMany, return))
+                                executeOperationsCh!((operations, howMany)) |
+                                @return!((true, "operations recorded, did execute"))
                               }
                               false => {
                                 @return!((true, "operations recorded, did not execute"))

@@ -1,29 +1,67 @@
 import React, { Fragment, useState } from 'react';
 
+import { hashCode } from './App';
 import { OperationsComponent } from './Operations';
 import { ApplyComponent } from './Apply';
 import { ProposedOperationsComponent } from './ProposedOperations';
+import { ActionsComponent } from './Actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
 });
 
+const getGroups = (proposedOperations) => {
+  let groups = {}
+  Object.keys(proposedOperations).forEach(memberId => {
+    if (!proposedOperations[memberId] || proposedOperations[memberId].length === 0) {
+      return;
+    }
+    const hash = hashCode(JSON.stringify(proposedOperations[memberId]))
+    if (groups[hash]) {
+      groups[hash].members.push(memberId)
+    } else {
+      groups = {
+        ...groups,
+        [hash]: {
+          operations: proposedOperations[memberId],
+          members: [memberId]
+        }
+      }
+    }
+  });
+
+  return groups;
+}
+
 export const MultisigComponent = (props) => {
   const [kick, setKick] = useState(false);
   const [tab, setTab] = useState('main');
 
+  /*
+    Groups of proposed operations
+  */
+  const groups = getGroups(props.proposedOperations);
+
   return <>
+  <div class="buttons">
+    <button className="is-dark button" type="button" onClick={() => props.back()}>Back</button>{' '}
+    <button disabled={props.reloading} className="is-dark button" type="button" onClick={() => props.reload({})}>{props.reloading ? 'Reloading' : 'Reload'}</button>
+  </div>
+  <br />
+  <br />
   <h1 className="title main is-2">Multisig {props.multisigRegistryUri}</h1>
   {' '}
   <a onClick={(e) => {
     e.preventDefault();
     navigator.clipboard.writeText(props.multisigRegistryUri)
-  }}>copy</a>
-  {' '}
-  { props.as && <span className="title-as">as {props.as}</span> }
+  }}>copy address</a>
+  <br />
+  {'Logged in as '}
+  <input type="text" className="input asinput is-small" value={props.as} onChange={e => {
+    props.setAs(e.target.value)
+  }} ></input>
   <div className="multisig">
-    <button disabled={props.reloading} className="reload button" type="button" onClick={() => props.reload({})}>{props.reloading ? 'Reloading' : 'Reload'}</button>
     <div className="main">
       {<div className="tabs">
         <ul>
@@ -54,7 +92,7 @@ export const MultisigComponent = (props) => {
             onClick={() => setTab('proposed')}
           >
             <a> Proposals{'  '}
-            { Object.keys(props.proposedOperations).length > 0 && <span className="tag is-light">{Object.keys(props.proposedOperations).length}</span>}
+            { Object.keys(groups).length > 0 && <span className="tag is-light">{Object.keys(groups).length}</span>}
             </a>
           </li>
           <li
@@ -103,6 +141,7 @@ export const MultisigComponent = (props) => {
     </div>
     {
       tab === 'main' &&
+      <>
       <div className="members">
         <h3 className="title is-4">
           {
@@ -115,38 +154,17 @@ export const MultisigComponent = (props) => {
             props.config.members.length > 1 && `Members (${props.config.members.length})`
           }
         </h3>
-        <button
-          type="button"
-          className={'button is-text vote-kicking' + (kick ? ' active' : '')}
-          onClick={(e) => {
-            e.preventDefault();
-            setKick(!kick)
-          }}
-        >
-          { kick && 'Cancel' }
-          { !kick && 'Start voting for kicking members out' }
-        </button>
-        <br />
         {props.config.members.map(m => {
           return (<p key={m} className="member">
             <b>{m}{' '}</b>
-            {
-              kick &&
-              <button
-                disabled={props.operations.find(o => o.type === 'KICKOUT' && o.memberId === m)}
-                type="button"
-                className="button is-small is-warning"
-                onClick={(e) => {
-                  e.preventDefault();
-                  props.addOperations([{ "type": "KICKOUT", "memberId": m }], false)}
-                }
-              >
-                kick
-              </button>
-            }
           </p>)
         })}
       </div>
+      <ActionsComponent
+        members={props.config.members}
+        addOperations={props.addOperations}
+      />
+      </>
     }
     {
       tab === 'proposed' &&
@@ -154,7 +172,7 @@ export const MultisigComponent = (props) => {
         as={props.as}
         addOperations={props.addOperations}
         members={props.config.members}
-        proposedOperations={props.proposedOperations}
+        groups={groups}
       />
     }
     {
