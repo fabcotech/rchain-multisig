@@ -1,6 +1,5 @@
 import React, { Fragment, useState } from 'react';
 
-import { hashCode } from './App';
 import { OperationsComponent } from './Operations';
 import { ApplyComponent } from './Apply';
 import { ProposedOperationsComponent } from './ProposedOperations';
@@ -11,37 +10,8 @@ const formatter = new Intl.NumberFormat('en-US', {
   currency: 'USD',
 });
 
-const getGroups = (proposedOperations) => {
-  let groups = {}
-  Object.keys(proposedOperations).forEach(memberId => {
-    if (!proposedOperations[memberId] || proposedOperations[memberId].length === 0) {
-      return;
-    }
-    const hash = hashCode(JSON.stringify(proposedOperations[memberId]))
-    if (groups[hash]) {
-      groups[hash].members.push(memberId)
-    } else {
-      groups = {
-        ...groups,
-        [hash]: {
-          operations: proposedOperations[memberId],
-          members: [memberId]
-        }
-      }
-    }
-  });
-
-  return groups;
-}
-
 export const MultisigComponent = (props) => {
-  const [kick, setKick] = useState(false);
   const [tab, setTab] = useState('main');
-
-  /*
-    Groups of proposed operations
-  */
-  const groups = getGroups(props.proposedOperations);
 
   return <>
   <div class="buttons">
@@ -83,7 +53,7 @@ export const MultisigComponent = (props) => {
             onClick={() => setTab('applications')}
           >
             <a>
-              Pending applications{'  '}
+              Submitted applications{'  '}
               { props.config.applications.length > 0 && <span className="tag is-light">{props.config.applications.length}</span>}
             </a>
           </li>
@@ -91,8 +61,8 @@ export const MultisigComponent = (props) => {
             className={tab === 'proposed' ? 'is-active' : ''}
             onClick={() => setTab('proposed')}
           >
-            <a> Proposals{'  '}
-            { Object.keys(groups).length > 0 && <span className="tag is-light">{Object.keys(groups).length}</span>}
+            <a> Pushed proposals{'  '}
+            { props.proposedOperations &&  Object.keys(props.proposedOperations.proposals).length > 0 && <span className="tag is-light">{Object.keys(props.proposedOperations.proposals).length}</span>}
             </a>
           </li>
           <li
@@ -128,7 +98,7 @@ export const MultisigComponent = (props) => {
           operations={props.operations}
           removeOperation={props.removeOperation}
           proposeOperations={props.proposeOperations}
-          proposedOperations={props.as && props.proposedOperations[props.as] ? props.proposedOperations[props.as] : []}
+          proposedOperations={props.proposedOperations}
         />
       }
       {
@@ -172,14 +142,14 @@ export const MultisigComponent = (props) => {
         as={props.as}
         addOperations={props.addOperations}
         members={props.config.members}
-        groups={groups}
+        proposedOperations={props.proposedOperations}
       />
     }
     {
       tab === 'applications' &&
       <div className="applications">
           {
-            props.config.applications.length === 0 && <b>No applications yet</b>
+            props.config.applications.length === 0 && <b>No applications submitted yet</b>
           }
           {
             props.config.applications.length === 1 && <h3 className="title is-4">1 Application</h3>

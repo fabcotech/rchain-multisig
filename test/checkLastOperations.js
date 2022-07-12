@@ -9,6 +9,7 @@ module.exports.main = async (multisigRegistryUri, lastOperations) => {
   let multisigOperations;
   try {
     multisigOperations = rc.utils.rhoValToJs(JSON.parse(result0).expr[0]);
+    console.log(multisigOperations)
   } catch (err) {
     if (lastOperations === null) {
       return null;

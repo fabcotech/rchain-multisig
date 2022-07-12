@@ -49,7 +49,15 @@ const main = async () => {
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2])
   console.log('✓ User 2 has joined the multisig');
 
-  await leave(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2);
+  try {
+    await leave(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2);
+  } catch (err) {
+  }
+
+  await new Promise(r => {
+    setTimeout(r, 20000)
+  });
+
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1])
   console.log('✓ User 2 left the multisig');
 
@@ -59,9 +67,11 @@ const main = async () => {
 
   proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS_GOING_NOWHERE, APPLICATION_ID2)
     .then(() => {
+      console.log('then')
       throw new Error('Operations should have gone nowhere')
     })
     .catch(err => {
+      console.log('catch')
       console.log('✓ User 2 has no capability anymore');
       process.exit()
     })

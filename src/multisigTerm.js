@@ -6,6 +6,7 @@ module.exports.multisigTerm = (payload) => {
   mintUriCh,
   validateStringCh,
   insertArbitrary(\`rho:registry:insertArbitrary\`),
+  blake2b256(\`rho:crypto:blake2b256Hash\`),
   stdout(\`rho:io:stdout\`),
   revAddress(\`rho:rev:address\`),
   registryLookup(\`rho:registry:lookup\`),
@@ -58,6 +59,8 @@ in {
       // { "apesmultisig": UnforgeableName<abcdef>}
       @(*self, "applications")!({}) |
 
+      @(*self, "operations")!({}) |
+
       @(*self, "lastExecutedOperations")!({}) |
 
       // Set of the multisig's member ids 
@@ -82,30 +85,33 @@ in {
       executeChannelCh!(*defaultExecuteChannelCh) |
 
       for (@("PUBLIC_READ_OPERATIONS", return) <= entryCh) {
-        for (@memberIds <<- @(*self, "members")) {
-          match memberIds {
-            Set() => { @return!({}) }
-            _ => {
-              new itCh, operationsCh in {
-                operationsCh!({}) |
-                itCh!(memberIds) |
-                for (@ids <= itCh) {
-                  match ids {
-                    Set() => {}
-                    Set(last) => {
-                      for (@ops <- operationsCh) {
-                        for (@op <<- @(*self, "operations", last)) {
-                          @return!(ops.set(last, op))
-                        }
-                      }
+        for (@proposals <<- @(*self, "operations")) {
+          new itCh, opsCh in {
+            opsCh!({}) |
+            itCh!(proposals.keys()) |
+            for (@tmpOps <= itCh) {
+              match tmpOps {
+                Set() => {
+                  @return!({
+                    "proposals": proposals,
+                    "operations": {}
+                  })
+                }
+                Set(last) => {
+                  for (@ops <- opsCh) {
+                    for (@o <<- @(*self, "operationsbyhash", last)) {
+                      @return!({
+                        "proposals": proposals,
+                        "operations": ops.set(last, o)
+                      })
                     }
-                    Set(first...rest) => {
-                      for (@ops <- operationsCh) {
-                        for (@op <<- @(*self, "operations", first)) {
-                          operationsCh!(ops.set(first, op)) |
-                          itCh!(rest)
-                        }
-                      }
+                  }
+                }
+                Set(first...rest) => {
+                  for (@ops <- opsCh) {
+                    for (@o <<- @(*self, "operationsbyhash", first)) {
+                      opsCh!(ops.set(first, o)) |
+                      itCh!(rest)
                     }
                   }
                 }
@@ -141,7 +147,7 @@ in {
                               "revBalance": balance,
                               "members": members,
                               "applications": applications.keys(),
-                              "version": "0.1.0",
+                              "version": "0.2.0",
                               "percentage": percentage,
                               "multisigMemberships": memberships,
                             })
@@ -207,30 +213,51 @@ in {
 
           new keyCh, actionCh in {
             contract actionCh(@("LEAVE", payload, return2)) = {
-              for (@members <- @(*self, "members")) {
-                @(*self, "members")!(members.delete(memberId))
-              } |
-              for (_ <- @(*self, "operations", memberId)) { Nil } |
-              @return2!((true, Nil))
+              new ret in {
+                for (@members <- @(*self, "members")) {
+                  @(*self, "members")!(members.delete(memberId))
+                } |
+                @(*self, "removeProposalIfExistsCh")!((memberId, return2))
+              }
             } |
 
             contract actionCh(@("PROPOSE_OPERATIONS", payload, return2)) = {
               match payload {
                 Nil => {
-                  for (_ <- @(*self, "operations", memberId)) {
-                    @(*self, "operations", memberId)!(Nil) |
-                    @return2!((true, Nil))
-                  }
+                  @(*self, "removeProposalIfExistsCh")!((memberId, return2))
                 }
                 _ => {
-                  for (_ <- @(*self, "operations", memberId)) {
-                    @(*self, "operations", memberId)!(payload) |
-                    checkAgreementCh!((payload, return2))
+                  new hashCh, ret in {
+                    @(*self, "removeProposalIfExistsCh")!((memberId, *ret)) |
+                    for (_ <- ret) {
+                      blake2b256!(payload.toByteArray(), *hashCh) |
+                      for (@hash <- hashCh) {
+                        for (@ops <- @(*self, "operations")) {
+                          if (ops.get(hash) == Nil) {
+                            @(*self, "operationsbyhash", hash)!(payload) |
+                            @(*self, "operations")!(
+                              ops.set(
+                                hash,
+                                Set(memberId)
+                              )
+                            )
+                          } else {
+                            @(*self, "operations")!(
+                              ops.set(
+                                hash,
+                                ops.get(hash).union(Set(memberId))
+                              )
+                            )
+                          } |
+                          checkAgreementCh!((payload, return2))
+                        }
+                      }
+                    }
                   }
                 }
               }
             } |
-      
+
             for (@(action, payload, return2) <= keyCh) {
               for (@revoked <- @(*self, "revoked", memberId)) {
                 match action {
@@ -250,7 +277,6 @@ in {
             } |
 
             @(*self, "revoked", memberId)!(Nil) |
-            @(*self, "operations", memberId)!(Nil) |
             @applicationCh!(bundle+{*keyCh}) |
             @return!((true, "application accepted"))
           }
@@ -258,99 +284,89 @@ in {
       } |
 
       for (@(operations, return) <= checkAgreementCh) {
-        new itCh, howManyCh in {
-          howManyCh!(Set()) |
-          for (@members <<- @(*self, "members")) {
-            for (@percentage <<- @(*self, "percentage")) {
-              itCh!(members) |
-              for (@tmpMembers <= itCh) {
-                match tmpMembers {
-                  Set(last) => {
-                    for (@op <<- @(*self, "operations", last)) {
-                      stdout!("let's compare those two operations processes") |
-                      stdout!(operations.toByteArray()) |
-                      stdout!(op.toByteArray()) |
-                      match operations.toByteArray() == op.toByteArray() {
-                        true => {
-                          stdout!("Last member's operations do not match") |
-                          for (@howMany <- howManyCh) {
-                            match howMany.size() + 1 {
-                              howMany2 => {
-                                stdout!(("howMany2", howMany2)) |
-                                stdout!(("members.size()", members.size())) |
-                                stdout!(("percentage", percentage)) |
-                                stdout!(("consensus", howMany2 * 100 / members.size())) |
-                                match howMany2 * 100 / members.size() >= percentage {
-                                  true => {
-                                    executeOperationsCh!((operations, howMany.union(Set(last)))) |
-                                    @return!((true, "operations recorded, did execute"))
-                                  }
-                                  false => {
-                                    @return!((true, "operations recorded, did not execute"))
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                        false => {
-                          stdout!("Last member's operations do match") |
-                          for (@howMany <- howManyCh) {
-                            stdout!(("howMany.size()", howMany.size())) |
-                            stdout!(("members.size()", members.size())) |
-                            stdout!(("percentage", percentage)) |
-                            stdout!(("consensus", howMany.size() * 100 / members.size())) |
-                            match howMany.size() * 100 / members.size() >= percentage {
-                              true => {
-                                executeOperationsCh!((operations, howMany)) |
-                                @return!((true, "operations recorded, did execute"))
-                              }
-                              false => {
-                                @return!((true, "operations recorded, did not execute"))
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  Set(first...rest) => {
-                    for (@op <<- @(*self, "operations", first)) {
-                      match operations.toByteArray() == op.toByteArray() {
-                        true => {
-                          for (@howMany <- howManyCh) {
-                            howManyCh!(howMany.union(Set(first))) |
-                            itCh!(rest)
-                          }
-                        }
-                        false => {
-                          itCh!(rest)
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      } |
-
-      for (@memberIds <= emptyOperationsCh) {
         new itCh in {
-          itCh!(memberIds) |
-          for (@ids <= itCh) {
-            match ids {
-              Set() => {}
-              Set(last) => {
-                for (_ <- @(*self, "operations", last)) {
-                  @(*self, "operations", last)!(Nil)
+          for (@members <<- @(*self, "members")) {
+            for (@ops <<- @(*self, "operations")) {
+              for (@percentage <<- @(*self, "percentage")) {
+                itCh!(ops.keys()) |
+                for (@tmpOps <= itCh) {
+                  match tmpOps {
+                    Set(last) => {
+                      if (ops.get(last).size() * 100 / members.size() >= percentage) {
+                        for (@opsToExecute <- @(*self, "operationsbyhash", last)) {
+                          executeOperationsCh!((opsToExecute, last)) |
+                          @return!((true, "operations recorded, did execute"))
+                        }
+                      } else {
+                        @return!((true, "operations recorded, did not execute"))
+                      }
+                    }
+                    Set(first...rest) => {
+                      if (ops.get(first).size() * 100 / members.size() >= percentage) {
+                        for (@opsToExecute <- @(*self, "operationsbyhash", first)) {
+                          stdout!(("hash", first, "let's execute", ops.get(first).size() * 100 / members.size())) |
+                          executeOperationsCh!((opsToExecute, first)) |
+                          @return!((true, "operations recorded, did execute"))
+                        }
+                      } else {
+                        stdout!(("don't execute hash", first, "continue iteration")) |
+                        itCh!(rest)
+                      }
+                    }
+                  }
                 }
-              }
-              Set(first...rest) => {
-                for (_ <- @(*self, "operations", first)) {
-                  @(*self, "operations", first)!(Nil) |
-                  itCh!(rest)
+              } 
+            }
+          }
+        }
+      } |
+
+      for (@(memberId, ret) <= @(*self, "removeProposalIfExistsCh")) {
+        new itCh in {
+          for (@ops <- @(*self, "operations")) {
+            itCh!(ops.keys()) |
+            for (@tmpOps <= itCh) {
+              match tmpOps {
+                Set() => {
+                  @(*self, "operations")!(ops) |
+                  @ret!((true, Nil))
+                }
+                Set(last) => {
+                  if (ops.get(last).contains(memberId)) {
+                    if (ops.get(last).size() == 1) {
+                      for (_ <- @(*self, "operationsbyhash", last)) { Nil } |
+                      @(*self, "operations")!(ops.delete(last))
+                    } else {
+                      @(*self, "operations")!(
+                        ops.set(
+                          last,
+                          ops.get(last).delete(memberId)
+                        )
+                      )
+                    } |
+                    @ret!((true, Nil))
+                  } else {
+                    @(*self, "operations")!(ops) |
+                    @ret!((true, Nil))
+                  }                  
+                }
+                Set(first...rest) => {
+                  if (ops.get(first).contains(memberId)) {
+                    if (ops.get(first).size() == 1) {
+                      for (_ <- @(*self, "operationsbyhash", first)) { Nil } |
+                      @(*self, "operations")!(ops.delete(first))
+                    } else {
+                      @(*self, "operations")!(
+                        ops.set(
+                          first,
+                          ops.get(first).delete(memberId)
+                        )
+                      )
+                    } |
+                    @ret!((true, Nil))
+                  } else {
+                    itCh!(rest)
+                  }
                 }
               }
             }
@@ -358,7 +374,16 @@ in {
         }
       } |
 
-      for (@(operations, memberIds) <= executeOperationsCh) {
+      for (@hash <= emptyOperationsCh) {
+        for (_ <- @(*self, "operationsbyhash", hash)) {
+          Nil
+        } |
+        for (@ops <- @(*self, "operations")) {
+          @(*self, "operations")!(ops.delete(hash))
+        }
+      } |
+
+      for (@(operations, hash) <= executeOperationsCh) {
         for (_ <- @(*self, "lastExecutedOperations")) {
           @(*self, "lastExecutedOperations")!({}) |
           match operations {
@@ -384,7 +409,7 @@ in {
                                 for (@result <- ret) {
                                   for (@leo <- @(*self, "lastExecutedOperations")) {
                                     @(*self, "lastExecutedOperations")!(leo.set("\${index}" %% { "index": index }, result)) |
-                                    emptyOperationsCh!(memberIds)
+                                    emptyOperationsCh!(hash)
                                   }
                                 }
                               }
@@ -416,7 +441,7 @@ in {
                 executeChannelCh!(operations) |
                 for (_ <- @(*self, "lastExecutedOperations")) {
                   @(*self, "lastExecutedOperations")!({ "0": (true, "execute channel updated")}) |
-                  emptyOperationsCh!(memberIds)
+                  emptyOperationsCh!(hash)
                 }
               }
             }

@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react';
 
 export const OperationsComponent = (props) => {
+
   return (
     <div className="operations">
       {

@@ -19,11 +19,6 @@ module.exports.read = async () => {
 
   console.log(`\n==== Multisig contract ====\n`);
   console.log(`Version                        : ${config.version}`);
-  if (config.applications.length) {
-    console.log(`Pending applications           : ${config.applications.length} :  ${config.applications.join(', ')}`);
-  } else {
-    console.log(`Pending applications           : none`);
-  }
   console.log(`Multisig resitry URI           : ${multisigRegistryUri} (not a REV address)`);
   console.log(`REV address                    : ${config.revAddress}`);
   console.log(`REV balance                    : ${config.revBalance} dust | ${Math.round(100 * parseInt(config.revBalance, 10) / 100000000) / 100} REV`);
@@ -35,7 +30,7 @@ module.exports.read = async () => {
   });
 
   if (Object.keys(config.applications).length) {
-    console.log(`\nPending applications           :`);
+    console.log(`\nPending applications (${Object.keys(config.applications).length})           :`);
     Object.keys(config.applications).forEach(pk => {
       console.log(`  ${config.applications[pk]}`)
     });

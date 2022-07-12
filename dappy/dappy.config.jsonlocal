@@ -1,0 +1,32 @@
+{
+  "options": {
+    "platform": "rchain",
+    "readOnly": "http://localhost:40403",
+    "validator": "http://localhost:40403",
+    "shardId": "dev",
+    "masterRegistryUri": "bkh7ruq38sq4g6r7duzz3uzyaswknia5sjxc9naaqrrtjuagmjx3up",
+    "boxId": "bkhmybox",
+    "nameSystemContractId": "bkhdappynamesystem",
+    "privateKey": "28a5c9ac133b4449ca38e9bdf7cacdce31079ef6b3ac2f0a080af83ecff98b36",
+    "contractId": "bkhraf",
+    "purseId": "multisig"
+  },
+  "zones": [
+    {
+      "origin": "multisig",
+      "ttl": 3600,
+      "records": [
+        {
+          "name": "@",
+          "type": "TXT",
+          "data": "DAPP_ADDRESS=bkhraf.multisig"
+        }
+      ]
+    }
+  ],
+  "dapp": {
+    "html": "./dapp.html",
+    "js": "./dist/main.js",
+    "css": "./dapp.css"
+  }
+}

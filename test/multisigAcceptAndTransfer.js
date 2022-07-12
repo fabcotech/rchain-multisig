@@ -7,7 +7,6 @@ const transferRev = require('./transferRev').main
 const getRevAddress = require('./getRevAddress').main
 const checkMultisigBalance = require('./checkMultisigBalance').main
 const checkMembers = require('./checkMembers').main
-const getBalance = require('./getBalance').main
 const deployMultisig = require('./test_deployMultisig').main
 const apply = require('./test_apply').main
 const mint = require('./test_mint').main
@@ -54,11 +53,11 @@ const main = async () => {
   console.log('✓ channel updated');
 
   await apply(multisigRegistryUri, PRIVATE_KEY2, APPLICATION_ID2)
-  console.log('apply1')
+  console.log('apply 1')
   await apply(multisigRegistryUri, PRIVATE_KEY3, APPLICATION_ID3)
-  console.log('apply2')
+  console.log('apply 2')
   await apply(multisigRegistryUri, PRIVATE_KEY4, APPLICATION_ID4)
-  console.log('apply3')
+  console.log('apply 3')
 
   const operationsShouldBeAccepted = [
     { "type": "ACCEPT", "applicationId": "doesnotexist" },

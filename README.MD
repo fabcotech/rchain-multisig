@@ -22,6 +22,9 @@ node cli propose-operations-channel
 
 # Read the informations of the multisig
 node cli read
+
+# Get a picture of pending proposals and related member IDs
+node cli read-operations
 ```
 
 #### Public methods

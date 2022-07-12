@@ -2,12 +2,13 @@ const rchainToolkit = require('@fabcotech/rchain-toolkit');
 
 const { proposeOperationsChannelTerm } = require('../src/');
 
-const { log, getMultisigRegistryUri } = require('./utils');
+const { log, getMultisigRegistryUri, getMemberId } = require('./utils');
 
 module.exports.proposeOperationsChannel = async () => {
 
   const term = proposeOperationsChannelTerm({
     multisigRegistryUri: getMultisigRegistryUri(),
+    memberId: getMemberId()
   });
 
   let dataAtNameResponse;

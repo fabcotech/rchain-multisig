@@ -21,8 +21,7 @@ module.exports.main = async (
         shardId: process.env.SHARD_ID,
         term: term,
         phloPrice: 1,
-        phloLimit: 10000000,
-        timeout: 3 * 60 * 1000
+        phloLimit: 10000000
       }
     );
   } catch (err) {

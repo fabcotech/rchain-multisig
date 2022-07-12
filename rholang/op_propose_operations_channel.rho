@@ -137,8 +137,7 @@ in {
                 @(self, "members")!(members.delete(op.get("memberId"))) |
                 for (@kicked <- @(self, "membersKickedOut")) {
                   @(self, "membersKickedOut")!(kicked.union(Set(op.get("memberId")))) |
-                  for (_ <- @(self, "operations", op.get("memberId"))) { Nil } |
-                  @return!((true, Nil))
+                  @(self, "removeProposalIfExistsCh")!((op.get("memberId"), return))
                 }
               }
             }

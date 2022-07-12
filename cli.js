@@ -77,17 +77,17 @@ const main = async () => {
     return;
   }
 
+  const readOperationsArg =
+  process.argv.findIndex((arg) => arg === 'read-operations') !== -1;
+  if (readOperationsArg) {
+    readOperations();
+    return;
+  }
+
   const readLastExecutedOperationsArg =
   process.argv.findIndex((arg) => arg === 'last-operations') !== -1;
   if (readLastExecutedOperationsArg) {
     readLastExecutedOperations();
-    return;
-  }
-
-  const readOperationsArg =
-  process.argv.findIndex((arg) => arg === 'operations') !== -1;
-  if (readOperationsArg) {
-    readOperations();
     return;
   }
 

@@ -34,8 +34,6 @@ const APPLICATION_ID4 = PUBLIC_KEY4.slice(0, 5);
 
 const main = async () => {
   await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS2, 1000000000);
-  await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS3, 1000000000);
-  await transferRev(PRIVATE_KEY1, ADDRESS1, ADDRESS4, 1000000000);
 
   const result = await deployMultisig(PRIVATE_KEY1);
   const mintRegistryUri = result.registryUri.replace('rho:id:', '');
@@ -55,56 +53,34 @@ const main = async () => {
   await apply(multisigRegistryUri, PRIVATE_KEY4, APPLICATION_ID4)
 
   const operationsShouldBeAccepted = [
-    { "type": "ACCEPT", "applicationId": "doesnotexist" },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID2 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID3 },
     { "type": "ACCEPT", "applicationId": APPLICATION_ID4 }
   ];
   const operationsShouldBeAcceptedResult = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsShouldBeAccepted, APPLICATION_ID1);
-  console.log('✓ channel updated');
-
   await checkLastOperations(multisigRegistryUri, {
-    "0": "application id not found",
+    "0": [true, "application accepted"],
     "1": [true, "application accepted"],
     "2": [true, "application accepted"],
-    "3": [true, "application accepted"],
   })
   await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2, APPLICATION_ID3]);
-
   console.log('✓ All 4 identities are registered got their OCAP keys')
 
-  const OPERATIONS3 = [
-    { "type": "KICKOUT", "memberId": APPLICATION_ID4 },
+  const operationsA = [
+    { "type": "ACCEPT", "applicationId": "a" },
   ];
+  const operationsAProposed = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsA, APPLICATION_ID1);
 
-  // 25%
-  const proposalkick1 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, OPERATIONS3, APPLICATION_ID1);
-  console.log(proposalkick1)
-  if (proposalkick1.message !== "operations recorded, did not execute") {
-    throw new Error('proposal kickout 1, expected "operations recorded, did not execute"')
-  }
-  console.log('✓ Proposal kickout 1')
+  await checkOperations(multisigRegistryUri, "05dee4d91376f2de0d0d76c50fa0a8ef271816cd846f6ce6407d5e181b94c2d1", 1);
+  console.log('✓ operations A proposed');
 
-  // 50%
-  const proposalkick2 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY2, OPERATIONS3, APPLICATION_ID2);
-  console.log(proposalkick2)
-  if (proposalkick2.message !== "operations recorded, did not execute") {
-    throw new Error('proposal kickout 2, expected "operations recorded, did not execute"')
-  }
-  console.log('✓ Proposal kickout 2');
+  const operationsB = [
+    { "type": "ACCEPT", "applicationId": "b" },
+  ];
+  const operationsBProposed = await proposeOperations(multisigRegistryUri, PRIVATE_KEY1, operationsB, APPLICATION_ID1);
 
-  await checkOperations(multisigRegistryUri, "6a9be9caa17645aa776ea68c7c520240c4108f21091ee11335928b35091ba628", 2);
-
-  // 75%
-  const proposalkick3 = await proposeOperations(multisigRegistryUri, PRIVATE_KEY3, OPERATIONS3, APPLICATION_ID3);
-
-  if (proposalkick3.message !== "operations recorded, did execute") {
-    throw new Error('proposal kickout 4, expected "operations recorded, did execute"')
-  }
-  console.log('✓ Proposal kickout 3')
-
-  await checkMembers(multisigRegistryUri, [APPLICATION_ID1, APPLICATION_ID2, APPLICATION_ID3])
-  console.log('✓ member 3 is no longer part of multisig');
+  await checkOperations(multisigRegistryUri, "2d59196b3c3228c0040965290456c9af56ace5facd6ab5ba0937d0399d24d1ca", 1);
+  console.log('✓ operations B proposed');
 }
 
 main();

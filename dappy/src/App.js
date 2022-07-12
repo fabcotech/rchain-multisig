@@ -8,9 +8,9 @@ import { applyTerm } from '../../src/applyTerm';
 import { LoadComponent } from './Load'
 import { MultisigComponent } from './Multisig'
 
-const SUPPORTED_VERSION = "0.1.0";
+const SUPPORTED_VERSION = "0.2.0";
 // testnet
-const MULTISIG_MINT_REGISTRY_URI = "uht1khkk6sske1xmku91k6occcfpm4crqzyugj56jkt1xmdar9nr3t";
+const MULTISIG_MINT_REGISTRY_URI = "3g4giwsa5e7fnfk5pnazimwpask6sorcy13931raamretdrsyfffjz";
 // local
 //const MULTISIG_MINT_REGISTRY_URI = "dnx8tatikpj6onuc9tkoeido1z5t9ij1crzojdrc7n6pn9b93tc4dp";
 
@@ -115,6 +115,7 @@ export class AppComponent extends React.Component {
   }
 
   load = ({ uri, as }) => {
+    console.log('load', uri, as)
     let term = readTerm({
       multisigRegistryUri: uri || this.state.multisigRegistryUri,
     });
@@ -124,12 +125,18 @@ export class AppComponent extends React.Component {
 
     this.rchainWeb.exploreDeploys([term, term2], false)
       .then(a => {
+        console.log(a);
+        console.log(JSON.parse(a.results[0].data));
+        console.log(JSON.parse(a.results[1].data));
         if (
           a.results && a.results[0] && a.results[0].success &&
           a.results && a.results[1] && a.results[1].success
         ) {
           const data = RChainWeb.utils.rhoValToJs(JSON.parse(a.results[0].data).expr[0]);
           const data2 = RChainWeb.utils.rhoValToJs(JSON.parse(a.results[1].data).expr[0]);
+
+          console.log(data)
+          console.log(data2)
 
           if (data.version === SUPPORTED_VERSION) {
             this.setState({

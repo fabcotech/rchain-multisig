@@ -8,7 +8,9 @@
     "test:acceptandtransfer": "node test/multisigAcceptAndTransfer.js",
     "test:kickout": "node test/multisigKickout.js",
     "test:leave": "node test/multisigLeave.js",
-    "test:recursive": "node test/multisigRecursive.js"
+    "test:recursive": "node test/multisigRecursive.js",
+    "test:changeproposal": "node test/multisigChangeProposal.js",
+    "test:all": "npm run test:acceptandtransfer && npm run test:kickout && npm run test:leave && npm run test:recursive && npm run test:changeproposal"
   },
   "repository": {
     "type": "git",
@@ -21,8 +23,8 @@
   },
   "homepage": "https://github.com/fabcotech/rchain-multisig#readme",
   "dependencies": {
-    "@fabcotech/dappy-cli": "17.1.0",
-    "@fabcotech/rchain-toolkit": "3.0.0",
+    "@fabcotech/dappy-cli": "17.2.0",
+    "@fabcotech/rchain-toolkit": "3.0.1",
     "dotenv": "6.2.0",
     "@babel/core": "^7.2.2",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
